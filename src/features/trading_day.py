@@ -16,8 +16,10 @@ def assign_effective_trading_day(published_at: pd.Series, trading_days: pd.Datet
     same_day_eligible = before_close & is_trading_day
 
     positions_next = sorted_days.searchsorted(calendar_day_naive.values, side="right")
-    positions_next = np.clip(positions_next, 0, len(sorted_days) - 1)
-    next_trading_day = pd.Series(sorted_days[positions_next], index=calendar_day_naive.index)
+    out_of_bounds = positions_next >= len(sorted_days)
+    safe_positions = np.where(out_of_bounds, 0, positions_next)
+    next_trading_day = pd.Series(sorted_days[safe_positions], index=calendar_day_naive.index)
+    next_trading_day = next_trading_day.mask(out_of_bounds, pd.NaT)
 
     effective = calendar_day_naive.where(same_day_eligible, next_trading_day)
     return effective.rename("effective_trading_day")
