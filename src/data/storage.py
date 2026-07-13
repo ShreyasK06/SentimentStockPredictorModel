@@ -15,7 +15,10 @@ def load_parquet(ticker: str, out_dir: Path) -> pd.DataFrame:
 
 
 def find_missing_trading_days(df: pd.DataFrame, trading_days: pd.DatetimeIndex) -> list:
-    have = set(pd.DatetimeIndex(df.index).normalize())
-    want = set(pd.DatetimeIndex(trading_days).normalize())
+    have = pd.DatetimeIndex(df.index).normalize()
+    want = pd.DatetimeIndex(trading_days).normalize()
+    # Strip timezone info to ensure comparison works regardless of tz-aware/tz-naive mismatch
+    have = set(have.tz_localize(None) if have.tz is not None else have)
+    want = set(want.tz_localize(None) if want.tz is not None else want)
     missing = sorted(want - have)
     return [d.strftime("%Y-%m-%d") for d in missing]

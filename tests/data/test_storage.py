@@ -24,3 +24,12 @@ def test_find_missing_trading_days_empty_when_complete():
     trading_days = pd.DatetimeIndex(["2024-01-02", "2024-01-03"])
     missing = find_missing_trading_days(df, trading_days)
     assert missing == []
+
+
+def test_find_missing_trading_days_tz_aware_index():
+    # Regression test: tz-aware index should match tz-naive trading_days
+    idx = pd.date_range("2024-01-02", periods=2, freq="B", tz="America/New_York")
+    df = pd.DataFrame({"Close": [1, 2]}, index=idx)
+    trading_days = pd.DatetimeIndex(["2024-01-02", "2024-01-03"])
+    missing = find_missing_trading_days(df, trading_days)
+    assert missing == []
