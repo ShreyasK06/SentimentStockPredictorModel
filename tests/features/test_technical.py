@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 from src.features.technical import compute_technical_features
 
 
@@ -50,9 +51,34 @@ def test_macd_hist_equals_macd_minus_signal():
 def test_technical_features_are_causal_no_lookahead():
     # The single most important property in this project: a feature at day t
     # must not change if future data (day t+1 onward) is altered.
-    df = _price_df(n=80)
+    # Note: n=120, modify from row 70, compare rows [:70] to ensure dist_from_ma50
+    # (window=50, first valid at row 49) has real (non-NaN) values in the slice.
+    df = _price_df(n=120)
     features_before = compute_technical_features(df)
     df_modified = df.copy()
-    df_modified.iloc[40:] = df_modified.iloc[40:] * 10
+    df_modified.iloc[70:] = df_modified.iloc[70:] * 10
     features_after = compute_technical_features(df_modified)
-    pd.testing.assert_frame_equal(features_before.iloc[:40], features_after.iloc[:40])
+    pd.testing.assert_frame_equal(features_before.iloc[:70], features_after.iloc[:70])
+
+
+def test_volatility_matches_manual_calculation():
+    df = _price_df(n=41)
+    features = compute_technical_features(df)
+    daily_returns = df["Close"].pct_change()
+    expected = daily_returns.iloc[1:21].std()  # 20-day window of pct_change (rows 1-20)
+    assert features["volatility_20d"].iloc[20] == pytest.approx(expected)
+
+
+def test_volume_ratio_matches_manual_calculation():
+    df = _price_df(n=40)
+    features = compute_technical_features(df)
+    expected = df["Volume"].iloc[19] / df["Volume"].iloc[0:20].mean()
+    assert features["volume_ratio_20d"].iloc[19] == pytest.approx(expected)
+
+
+def test_dist_from_ma50_matches_manual_calculation():
+    df = _price_df(n=60)
+    features = compute_technical_features(df)
+    ma50 = df["Close"].iloc[0:50].mean()
+    expected = (df["Close"].iloc[49] - ma50) / ma50
+    assert features["dist_from_ma50"].iloc[49] == pytest.approx(expected)
