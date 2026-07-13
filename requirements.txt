@@ -1,0 +1,9 @@
+pandas
+numpy
+yfinance
+pandas_market_calendars
+requests
+pyarrow
+python-dotenv
+pytest
+pytest-mock
