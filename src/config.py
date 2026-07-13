@@ -9,6 +9,7 @@ DATA_RAW_DIR = PROJECT_ROOT / "data" / "raw"
 DATA_PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 PRICES_DIR = DATA_RAW_DIR / "prices"
 NEWS_DIR = DATA_RAW_DIR / "news"
+SENTIMENT_DIR = DATA_RAW_DIR / "sentiment"
 
 FINNHUB_API_KEY = os.environ.get("FINNHUB_API_KEY", "")
 
