@@ -27,6 +27,16 @@ def test_fetch_ohlcv_returns_expected_columns(mock_download):
 
 
 @patch("src.data.prices.yf.download")
+def test_fetch_ohlcv_requests_yfinance_end_exclusive_of_requested_end(mock_download):
+    # yfinance's `end` is exclusive; fetch_ohlcv must request one day past the
+    # caller's `end` so the caller's own end date is actually included.
+    mock_download.return_value = _fake_yf_frame()
+    fetch_ohlcv("AAPL", "2024-01-01", "2024-01-05")
+    call_kwargs = mock_download.call_args.kwargs
+    assert call_kwargs["end"] == "2024-01-06"
+
+
+@patch("src.data.prices.yf.download")
 def test_fetch_ohlcv_raises_on_empty(mock_download):
     mock_download.return_value = pd.DataFrame()
     with pytest.raises(ValueError):
