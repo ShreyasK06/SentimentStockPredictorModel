@@ -1,3 +1,4 @@
+import pandas as pd
 from unittest.mock import patch, MagicMock
 from src.data.news import fetch_company_news, articles_to_dataframe, _year_chunks
 
@@ -93,11 +94,36 @@ def test_fetch_company_news_multi_year_aggregation(mock_get, mock_sleep):
 def test_articles_to_dataframe_normalizes_schema():
     articles = [{"headline": "AAPL rises", "datetime": 1704153600, "source": "Reuters", "url": "http://x"}]
     df = articles_to_dataframe(articles, "AAPL")
-    assert list(df.columns) == ["date", "ticker", "headline", "source", "url"]
+    assert list(df.columns) == ["date", "ticker", "headline", "source", "url", "published_at"]
     assert df.iloc[0]["ticker"] == "AAPL"
+    # published_at must hold the exact UTC timestamp, not normalized to midnight
+    expected_published_at = pd.Timestamp(1704153600, unit="s", tz="UTC")
+    assert df.iloc[0]["published_at"] == expected_published_at
 
 
 def test_articles_to_dataframe_empty_list():
     df = articles_to_dataframe([], "AAPL")
     assert len(df) == 0
-    assert list(df.columns) == ["date", "ticker", "headline", "source", "url"]
+    assert list(df.columns) == ["date", "ticker", "headline", "source", "url", "published_at"]
+
+
+def test_articles_to_dataframe_buckets_by_us_eastern_calendar_day():
+    # Epoch arithmetic (verified via pandas):
+    #   A = 2024-01-15 23:30:00 UTC -> epoch 1705361400 -> ET 2024-01-15 18:30:00-05:00 (Jan 15 ET)
+    #   B = 2024-01-16 03:30:00 UTC -> epoch 1705375800 -> ET 2024-01-15 22:30:00-05:00 (Jan 15 ET)
+    #   C = 2024-01-16 09:00:00 UTC -> epoch 1705395600 -> ET 2024-01-16 04:00:00-05:00 (Jan 16 ET)
+    # A and B are on different UTC calendar days (Jan 15 vs Jan 16) but the SAME US-Eastern
+    # calendar day (Jan 15). C is a different US-Eastern calendar day (Jan 16).
+    articles = [
+        {"headline": "A", "datetime": 1705361400, "source": "Reuters", "url": "http://a"},
+        {"headline": "B", "datetime": 1705375800, "source": "Reuters", "url": "http://b"},
+        {"headline": "C", "datetime": 1705395600, "source": "Reuters", "url": "http://c"},
+    ]
+    df = articles_to_dataframe(articles, "AAPL")
+
+    expected_jan15_et = pd.Timestamp("2024-01-15", tz="America/New_York")
+    expected_jan16_et = pd.Timestamp("2024-01-16", tz="America/New_York")
+
+    assert df.iloc[0]["date"] == expected_jan15_et
+    assert df.iloc[1]["date"] == expected_jan15_et
+    assert df.iloc[2]["date"] == expected_jan16_et

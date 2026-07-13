@@ -5,7 +5,9 @@ REQUIRED_COLUMNS = ["Open", "High", "Low", "Close", "Volume"]
 
 
 def fetch_ohlcv(ticker: str, start: str, end: str) -> pd.DataFrame:
-    df = yf.download(ticker, start=start, end=end, progress=False, auto_adjust=True)
+    # auto_adjust=True: prices are split/dividend-adjusted, the standard choice for
+    # return-based ML. This is intentional, not a bug - kept for future readers.
+    df = yf.download(ticker, start=start, end=end, progress=False, auto_adjust=True, interval="1d")
     if df.empty:
         raise ValueError(f"No price data returned for {ticker} between {start} and {end}")
     if isinstance(df.columns, pd.MultiIndex):

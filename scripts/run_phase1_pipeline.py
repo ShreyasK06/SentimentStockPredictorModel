@@ -10,13 +10,16 @@ def main():
 
     panel = build_price_panel(UNIVERSE, config.START_DATE, config.END_DATE, config.PRICES_DIR)
     gap_report = validate_price_panel(panel, UNIVERSE, trading_days)
-    total_missing = sum(len(v) for v in gap_report.values())
+    total_missing = sum(len(v["missing"]) for v in gap_report.values())
+    total_misaligned = sum(len(v["misaligned"]) for v in gap_report.values())
 
     print(f"Trading days expected: {len(trading_days)}")
     print(f"Tickers pulled: {len(UNIVERSE)}")
     print(f"Total price rows: {len(panel)}")
-    print(f"Tickers with gaps: {[t for t, v in gap_report.items() if v]}")
+    print(f"Tickers with gaps: {[t for t, v in gap_report.items() if v['missing']]}")
+    print(f"Tickers with misaligned dates: {[t for t, v in gap_report.items() if v['misaligned']]}")
     print(f"Total missing (ticker, day) cells: {total_missing}")
+    print(f"Total misaligned (ticker, day) cells: {total_misaligned}")
 
     if not config.FINNHUB_API_KEY:
         print("FINNHUB_API_KEY not set - skipping news pull. Set it in .env to fetch headlines.")

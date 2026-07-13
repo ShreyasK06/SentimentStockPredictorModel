@@ -29,10 +29,17 @@ def fetch_company_news(ticker: str, start: str, end: str, api_key: str, sleep_se
 
 
 def articles_to_dataframe(articles: list, ticker: str) -> pd.DataFrame:
-    columns = ["date", "ticker", "headline", "source", "url"]
+    columns = ["date", "ticker", "headline", "source", "url", "published_at"]
     if not articles:
         return pd.DataFrame(columns=columns)
     df = pd.DataFrame(articles)
-    df["date"] = pd.to_datetime(df["datetime"], unit="s").dt.normalize()
+    # Preserve the exact publish moment (UTC, tz-aware) so downstream phases can
+    # enforce "only information available before market close on day t".
+    ts = pd.to_datetime(df["datetime"], unit="s", utc=True)
+    df["published_at"] = ts
+    # Bucket into a calendar day using US Eastern time (the market's local time),
+    # not raw UTC, since UTC-midnight bucketing can misattribute headlines
+    # published near market close to the wrong US trading day.
+    df["date"] = ts.dt.tz_convert("America/New_York").dt.normalize()
     df["ticker"] = ticker
     return df[columns]

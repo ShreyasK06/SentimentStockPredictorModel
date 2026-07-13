@@ -22,3 +22,14 @@ def find_missing_trading_days(df: pd.DataFrame, trading_days: pd.DatetimeIndex) 
     want = set(want.tz_localize(None) if want.tz is not None else want)
     missing = sorted(want - have)
     return [d.strftime("%Y-%m-%d") for d in missing]
+
+
+def find_misaligned_dates(df: pd.DataFrame, trading_days: pd.DatetimeIndex) -> list:
+    """Return dates present in df that are NOT real NYSE trading days (have - want)."""
+    have = pd.DatetimeIndex(df.index).normalize()
+    want = pd.DatetimeIndex(trading_days).normalize()
+    # Strip timezone info to ensure comparison works regardless of tz-aware/tz-naive mismatch
+    have = set(have.tz_localize(None) if have.tz is not None else have)
+    want = set(want.tz_localize(None) if want.tz is not None else want)
+    misaligned = sorted(have - want)
+    return [d.strftime("%Y-%m-%d") for d in misaligned]

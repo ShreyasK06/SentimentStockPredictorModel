@@ -32,7 +32,7 @@ def test_validate_price_panel_flags_gap():
     })
     trading_days = pd.DatetimeIndex(["2024-01-02", "2024-01-03", "2024-01-04"])
     report = validate_price_panel(panel, ["AAPL"], trading_days)
-    assert report["AAPL"] == ["2024-01-03"]
+    assert report["AAPL"] == {"missing": ["2024-01-03"], "misaligned": []}
 
 
 def test_validate_price_panel_empty_when_complete():
@@ -43,7 +43,35 @@ def test_validate_price_panel_empty_when_complete():
     })
     trading_days = pd.DatetimeIndex(["2024-01-02", "2024-01-03"])
     report = validate_price_panel(panel, ["AAPL"], trading_days)
-    assert report["AAPL"] == []
+    assert report["AAPL"] == {"missing": [], "misaligned": []}
+
+
+def test_validate_price_panel_flags_misaligned_date():
+    # 2024-01-06 is a Saturday - present in data but not a real trading day.
+    panel = pd.DataFrame({
+        "date": pd.DatetimeIndex(["2024-01-02", "2024-01-03", "2024-01-06"]),
+        "ticker": ["AAPL", "AAPL", "AAPL"],
+        "Close": [1, 2, 3],
+    })
+    trading_days = pd.DatetimeIndex(["2024-01-02", "2024-01-03"])
+    report = validate_price_panel(panel, ["AAPL"], trading_days)
+    assert report["AAPL"] == {"missing": [], "misaligned": ["2024-01-06"]}
+
+
+@patch("src.data.build_dataset.save_parquet")
+@patch("src.data.build_dataset.fetch_ohlcv")
+def test_build_price_panel_skips_failed_ticker_and_continues(mock_fetch, mock_save, tmp_path):
+    def _side_effect(ticker, start, end):
+        if ticker == "MSFT":
+            raise RuntimeError("network error")
+        return _fake_prices(ticker, start, end)
+
+    mock_fetch.side_effect = _side_effect
+    panel = build_price_panel(["AAPL", "MSFT"], "2024-01-01", "2024-01-05", tmp_path)
+
+    assert set(panel["ticker"]) == {"AAPL"}
+    assert len(panel) == 3
+    assert mock_save.call_count == 1
 
 
 def _fake_articles(ticker, start, end, api_key):
@@ -81,3 +109,22 @@ def test_build_news_archive_counts_and_saves_per_ticker(mock_fetch, mock_article
 
     # Verify save_parquet was called once per ticker
     assert mock_save.call_count == 2
+
+
+@patch("src.data.build_dataset.save_parquet")
+@patch("src.data.build_dataset.articles_to_dataframe")
+@patch("src.data.build_dataset.fetch_company_news")
+def test_build_news_archive_skips_failed_ticker_and_continues(mock_fetch, mock_articles_df, mock_save, tmp_path):
+    def _side_effect(ticker, start, end, api_key):
+        if ticker == "MSFT":
+            raise RuntimeError("network error")
+        return _fake_articles(ticker, start, end, api_key)
+
+    mock_fetch.side_effect = _side_effect
+    mock_articles_df.side_effect = _fake_articles_to_dataframe
+
+    result = build_news_archive(["AAPL", "MSFT"], "2024-01-01", "2024-01-05", tmp_path, api_key="fake")
+
+    # MSFT failed and should be excluded entirely from the result
+    assert result == {"AAPL": 1}
+    assert mock_save.call_count == 1
