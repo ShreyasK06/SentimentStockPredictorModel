@@ -45,3 +45,24 @@ def test_labels_preserve_index():
     labels = generate_labels(close, horizon=5)
     assert labels.index.equals(idx)
     assert labels.name == "label"
+
+
+def test_label_resolves_correctly_when_both_thresholds_hit_within_horizon():
+    # entry=100 at index0; future = [99, 97, 103, 104, 105] (horizon=5)
+    # down_target=98 hit at future index1 (97); up_target=102 hit at future index2 (103)
+    # down is hit FIRST (index1 < index2) -> label should be 0, even though
+    # the up-threshold is also eventually crossed within the same horizon.
+    idx = pd.date_range("2024-01-02", periods=6, freq="B")
+    close = pd.Series([100, 99, 97, 103, 104, 105], index=idx, dtype=float)
+    labels = generate_labels(close, horizon=5, up_threshold=0.02, down_threshold=0.02)
+    assert labels.iloc[0] == 0.0
+
+
+def test_label_resolves_correctly_when_up_hits_before_down_within_horizon():
+    # entry=100 at index0; future = [103, 97, 96, 95, 94] (horizon=5)
+    # up_target=102 hit at future index0 (103); down_target=98 hit at future index1 (97)
+    # up is hit FIRST (index0 < index1) -> label should be 1.
+    idx = pd.date_range("2024-01-02", periods=6, freq="B")
+    close = pd.Series([100, 103, 97, 96, 95, 94], index=idx, dtype=float)
+    labels = generate_labels(close, horizon=5, up_threshold=0.02, down_threshold=0.02)
+    assert labels.iloc[0] == 1.0
