@@ -9,3 +9,5 @@ pytest
 pytest-mock
 transformers
 torch
+scikit-learn
+lightgbm
