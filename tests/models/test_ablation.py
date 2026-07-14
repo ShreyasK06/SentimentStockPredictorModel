@@ -33,3 +33,15 @@ def test_technical_only_outperforms_sentiment_only_on_technical_driven_label():
     X_eval, y_eval = X.iloc[100:], y.iloc[100:]
     result = run_ablation(X_train, y_train, X_eval, y_eval)
     assert result.loc["technical_only", "accuracy"] > result.loc["sentiment_only", "accuracy"]
+
+
+def test_technical_columns_includes_new_indicators():
+    new_indicators = [
+        "bollinger_pctb", "bollinger_bandwidth", "atr_14_norm",
+        "stochastic_k", "stochastic_d", "obv_zscore",
+        "dist_from_52w_high", "dist_from_52w_low",
+        "day_of_week_sin", "day_of_week_cos",
+    ]
+    for col in new_indicators:
+        assert col in TECHNICAL_COLUMNS
+    assert len(TECHNICAL_COLUMNS) == 21

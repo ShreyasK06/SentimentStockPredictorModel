@@ -7,6 +7,10 @@ TECHNICAL_COLUMNS = [
     "return_1d", "return_5d", "return_10d", "return_20d",
     "rsi_14", "macd", "macd_signal", "macd_hist",
     "volatility_20d", "volume_ratio_20d", "dist_from_ma50",
+    "bollinger_pctb", "bollinger_bandwidth", "atr_14_norm",
+    "stochastic_k", "stochastic_d", "obv_zscore",
+    "dist_from_52w_high", "dist_from_52w_low",
+    "day_of_week_sin", "day_of_week_cos",
 ]
 
 SENTIMENT_COLUMNS = [
