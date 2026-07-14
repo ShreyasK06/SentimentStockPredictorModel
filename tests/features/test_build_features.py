@@ -27,6 +27,22 @@ def _scored_news(ticker="AAPL"):
     })
 
 
+def _scored_news_at(trading_days, day_indices, scores, ticker="AAPL"):
+    # Build headlines published well before market close on specific trading
+    # days (identified by position in `trading_days`), so each headline's
+    # effective_trading_day is exactly that day.
+    published = [
+        pd.Timestamp(trading_days[i], tz="America/New_York").replace(hour=9).tz_convert("UTC")
+        for i in day_indices
+    ]
+    return pd.DataFrame({
+        "headline": [f"headline_day{i}" for i in day_indices],
+        "ticker": ticker,
+        "sentiment_score": scores,
+        "published_at": published,
+    })
+
+
 def test_build_ticker_feature_matrix_drops_warmup_and_tail_rows():
     price_df = _price_df()
     scored_news = _scored_news()
@@ -38,6 +54,8 @@ def test_build_ticker_feature_matrix_drops_warmup_and_tail_rows():
     assert matrix["label"].isna().sum() == 0
     assert "ticker" in matrix.columns
     assert (matrix["ticker"] == "AAPL").all()
+    # Final deliverable: no NaN in any feature/label column of the matrix.
+    assert matrix.isna().sum().sum() == 0
 
 
 def test_build_ticker_feature_matrix_handles_ticker_with_no_news():
@@ -47,6 +65,11 @@ def test_build_ticker_feature_matrix_handles_ticker_with_no_news():
     matrix = build_ticker_feature_matrix(price_df, empty_news, trading_days)
     assert len(matrix) > 0
     assert matrix["headline_count"].fillna(0).eq(0).all()
+    # No news at all must not leave NaN sentiment features in the final matrix.
+    assert matrix["sentiment_mean"].notna().all()
+    assert matrix["sentiment_std"].notna().all()
+    assert matrix["sentiment_roll3"].notna().all()
+    assert matrix["sentiment_roll7"].notna().all()
 
 
 def test_build_feature_matrix_concatenates_all_tickers():
@@ -59,11 +82,36 @@ def test_build_feature_matrix_concatenates_all_tickers():
 
 def test_full_pipeline_is_causal_no_lookahead():
     # End-to-end causality check across technical + sentiment + label joins:
-    # altering price and news data from day 60 onward must not change any
+    # altering price AND news data from day 60 onward must not change any
     # feature (not label - labels are intentionally forward-looking) at day < 60.
+    #
+    # Row-index reasoning (n=80 price rows, indices 0..79):
+    #   - warmup: dist_from_ma50 needs a 50-row window -> first surviving row
+    #     is index 49 (matrix.index.min() >= price_df.index[49]).
+    #   - tail: label needs 10 future rows -> last surviving row is index 69
+    #     (matrix.index.max() <= price_df.index[-11] == price_df.index[69]).
+    #   So the surviving matrix spans rows 49..69 inclusive.
+    #   - the "day < 60" compared range within that span is rows 49..59.
+    #   - headlines placed at day indices 50-55 land inside that compared
+    #     range and are NEVER mutated, so they must produce genuine
+    #     (non-zero) sentiment values in the compared rows.
+    #   - headlines placed at day indices 60, 62, 65 land in the mutated tail
+    #     (rows 60..69) and ARE mutated, to prove a sentiment-only change
+    #     propagates through aggregate_daily_sentiment / add_rolling_sentiment
+    #     without leaking backward into rows < 60.
     price_df = _price_df(n=80)
-    scored_news = _scored_news()
     trading_days = price_df.index
+
+    before_indices = [50, 51, 52, 53, 54, 55]
+    before_scores = [0.3, -0.1, 0.5, 0.0, 0.2, 0.4]
+    after_indices = [60, 62, 65]
+    after_scores = [0.4, -0.2, 0.1]
+
+    scored_news = pd.concat([
+        _scored_news_at(trading_days, before_indices, before_scores),
+        _scored_news_at(trading_days, after_indices, after_scores),
+    ], ignore_index=True)
+
     feature_cols = [
         "return_1d", "return_5d", "return_10d", "return_20d", "rsi_14",
         "macd", "macd_signal", "macd_hist", "volatility_20d", "volume_ratio_20d",
@@ -72,16 +120,52 @@ def test_full_pipeline_is_causal_no_lookahead():
     ]
     matrix_before = build_ticker_feature_matrix(price_df, scored_news, trading_days)
 
+    day60 = trading_days[60]
+    common_index = matrix_before.index[matrix_before.index < day60]
+    assert len(common_index) > 0
+
+    # Sanity: the compared range must actually contain genuine, non-NaN,
+    # non-zero (headline-driven) sentiment values. Otherwise the equality
+    # assertion below would pass vacuously (NaN == NaN, or 0.0 == 0.0 for
+    # every no-news day) without ever comparing real sentiment data.
+    assert matrix_before.loc[common_index, "headline_count"].gt(0).any()
+    assert matrix_before.loc[common_index, "sentiment_mean"].notna().any()
+    assert matrix_before.loc[common_index, "sentiment_mean"].ne(0.0).any()
+
+    # Mutate price from day 60 onward (as before)...
     price_df_modified = price_df.copy()
-    price_df_modified.loc[price_df_modified.index[60]:, "Close"] *= 5
-    price_df_modified.loc[price_df_modified.index[60]:, "Volume"] *= 5
+    price_df_modified.loc[day60:, "Close"] *= 5
+    price_df_modified.loc[day60:, "Volume"] *= 5
 
-    matrix_after = build_ticker_feature_matrix(price_df_modified, scored_news, trading_days)
+    # ...AND mutate news effective on/after day 60: headlines before day 60
+    # are unchanged, headlines on/after day 60 have sentiment_score
+    # drastically altered (x -10).
+    news_modified = pd.concat([
+        _scored_news_at(trading_days, before_indices, before_scores),
+        _scored_news_at(trading_days, after_indices, [s * -10 for s in after_scores]),
+    ], ignore_index=True)
 
-    common_index = matrix_before.index[matrix_before.index < price_df.index[60]]
+    matrix_after = build_ticker_feature_matrix(price_df_modified, news_modified, trading_days)
+
     common_index = common_index.intersection(matrix_after.index)
     assert len(common_index) > 0
     pd.testing.assert_frame_equal(
         matrix_before.loc[common_index, feature_cols],
         matrix_after.loc[common_index, feature_cols],
     )
+
+    # Sanity: the day-60+ mutation (price AND news) must actually have had an
+    # effect somewhere at/after day 60 - otherwise "no effect before day 60"
+    # could trivially hold because the mutation did nothing anywhere.
+    tail_index = matrix_before.index[matrix_before.index >= day60]
+    tail_index = tail_index.intersection(matrix_after.index)
+    assert len(tail_index) > 0
+    assert not matrix_before.loc[tail_index, feature_cols].equals(
+        matrix_after.loc[tail_index, feature_cols]
+    )
+
+    # Specifically confirm the sentiment mutation (independent of the price
+    # mutation, which alone would only move technical columns) changed
+    # sentiment_mean at day 60, where a mutated headline lives.
+    assert day60 in matrix_before.index and day60 in matrix_after.index
+    assert matrix_before.loc[day60, "sentiment_mean"] != matrix_after.loc[day60, "sentiment_mean"]

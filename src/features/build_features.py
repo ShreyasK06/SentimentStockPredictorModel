@@ -21,6 +21,15 @@ def build_ticker_feature_matrix(price_df: pd.DataFrame, scored_news: pd.DataFram
 
     matrix = technical.join(sentiment, how="left").join(labels, how="left")
     matrix["ticker"] = ticker
+
+    # No-news trading days produce NaN sentiment features (headline_count is
+    # already filled to 0 by add_rolling_sentiment). Treat "no news" as a
+    # neutral (0.0) sentiment signal so the final matrix has no NaN in any
+    # feature column - headline_count == 0 still lets downstream consumers
+    # distinguish "genuinely neutral news" from "no news at all".
+    sentiment_cols = ["sentiment_mean", "sentiment_std", "sentiment_roll3", "sentiment_roll7"]
+    matrix[sentiment_cols] = matrix[sentiment_cols].fillna(0.0)
+
     matrix = matrix.dropna(subset=technical.columns)
     matrix = matrix.dropna(subset=["label"])
     return matrix
