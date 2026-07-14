@@ -1,7 +1,7 @@
 from src import config
 from src.data.storage import load_parquet
 from src.models.splits import time_split
-from src.models.train import fit_logistic_regression, fit_lightgbm, predict_proba
+from src.models.train import fit_logistic_regression, fit_lightgbm, fit_random_forest, fit_xgboost, predict_proba
 from src.models.evaluate import (
     majority_baseline, accuracy_at_threshold, breakdown_by_year,
     breakdown_by_regime, sweep_confidence_threshold,
@@ -31,20 +31,30 @@ def main():
 
     lr_model, scaler = fit_logistic_regression(X_train, y_train)
     lgbm_model = fit_lightgbm(X_train, y_train)
+    rf_model = fit_random_forest(X_train, y_train)
+    xgb_model = fit_xgboost(X_train, y_train)
 
     lr_val_proba = predict_proba(lr_model, X_validate, scaler=scaler)
     lgbm_val_proba = predict_proba(lgbm_model, X_validate)
+    rf_val_proba = predict_proba(rf_model, X_validate)
+    xgb_val_proba = predict_proba(xgb_model, X_validate)
 
     lines.append("\n## Validation-year (2023) results\n")
     lines.append(f"Logistic regression majority baseline: {majority_baseline(y_validate):.3f}\n")
     lines.append(f"Logistic regression accuracy @0.5: {accuracy_at_threshold(y_validate, lr_val_proba, 0.5)}\n")
     lines.append(f"LightGBM accuracy @0.5: {accuracy_at_threshold(y_validate, lgbm_val_proba, 0.5)}\n")
+    lines.append(f"Random Forest accuracy @0.5: {accuracy_at_threshold(y_validate, rf_val_proba, 0.5)}\n")
+    lines.append(f"XGBoost accuracy @0.5: {accuracy_at_threshold(y_validate, xgb_val_proba, 0.5)}\n")
 
     lines.append("\n## Confidence-threshold sweep (tuned on validation only)\n")
     lines.append("Logistic regression:\n")
     lines.append(sweep_confidence_threshold(y_validate, lr_val_proba).to_string())
     lines.append("\nLightGBM:\n")
     lines.append(sweep_confidence_threshold(y_validate, lgbm_val_proba).to_string())
+    lines.append("\nRandom Forest:\n")
+    lines.append(sweep_confidence_threshold(y_validate, rf_val_proba).to_string())
+    lines.append("\nXGBoost:\n")
+    lines.append(sweep_confidence_threshold(y_validate, xgb_val_proba).to_string())
 
     lines.append("\n## Ablation (LightGBM, evaluated on validation year)\n")
     ablation_result = run_ablation(X_train, y_train, X_validate, y_validate)
@@ -60,12 +70,16 @@ def main():
     X_test, y_test = _split_xy(test_df)
     lr_test_proba = predict_proba(lr_model, X_test, scaler=scaler)
     lgbm_test_proba = predict_proba(lgbm_model, X_test)
+    rf_test_proba = predict_proba(rf_model, X_test)
+    xgb_test_proba = predict_proba(xgb_model, X_test)
 
     lines.append(f"\n## TEST SET RESULTS (2024-2025) - evaluated ONCE at threshold={chosen_threshold}\n")
     lines.append(f"Test (untouched until this run): {test_df.index.min()} to {test_df.index.max()} ({len(test_df)} rows)\n")
     lines.append(f"Test-set majority baseline: {majority_baseline(y_test):.3f}\n")
     lines.append(f"Logistic regression: {accuracy_at_threshold(y_test, lr_test_proba, chosen_threshold)}\n")
     lines.append(f"LightGBM: {accuracy_at_threshold(y_test, lgbm_test_proba, chosen_threshold)}\n")
+    lines.append(f"Random Forest: {accuracy_at_threshold(y_test, rf_test_proba, chosen_threshold)}\n")
+    lines.append(f"XGBoost: {accuracy_at_threshold(y_test, xgb_test_proba, chosen_threshold)}\n")
 
     lines.append("\n### Per-year breakdown (LightGBM, test set)\n")
     lines.append(breakdown_by_year(y_test, lgbm_test_proba, X_test.index, threshold=chosen_threshold).to_string())
