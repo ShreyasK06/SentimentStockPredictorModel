@@ -31,22 +31,43 @@ def test_accuracy_at_threshold_abstains_below_confidence():
 
 
 def test_breakdown_by_year_groups_correctly():
-    idx = pd.DatetimeIndex(["2022-01-01", "2022-06-01", "2023-01-01"])
-    y_true = pd.Series([1.0, 0.0, 1.0], index=idx)
-    proba = np.array([0.9, 0.1, 0.9])
+    # Test with different label balance per year to verify per-subset majority_baseline
+    # 2022: y=[1.0, 0.0] -> majority_baseline = 0.5 (balanced)
+    # 2023: y=[1.0, 1.0, 0.0] -> majority_baseline = 2/3 (imbalanced, DIFFERENT from 2022)
+    idx = pd.DatetimeIndex(["2022-01-01", "2022-06-01", "2023-01-01", "2023-02-01", "2023-03-01"])
+    y_true = pd.Series([1.0, 0.0, 1.0, 1.0, 0.0], index=idx)
+    proba = np.array([0.9, 0.1, 0.9, 0.9, 0.1])
     result = breakdown_by_year(y_true, proba, idx, threshold=0.5)
     assert set(result.index) == {2022, 2023}
     assert result.loc[2022, "n"] == 2
     assert result.loc[2022, "accuracy"] == pytest.approx(1.0)
-    assert "majority_baseline" in result.columns
+    assert result.loc[2022, "majority_baseline"] == pytest.approx(0.5)
+    assert result.loc[2023, "n"] == 3
+    assert result.loc[2023, "accuracy"] == pytest.approx(1.0)
+    assert result.loc[2023, "majority_baseline"] == pytest.approx(2 / 3)
+    # Verify that different years have different majority_baseline values
+    # (this catches regressions to a single global majority_baseline)
+    assert result.loc[2022, "majority_baseline"] != result.loc[2023, "majority_baseline"]
 
 
 def test_breakdown_by_regime_groups_correctly():
-    idx = pd.DatetimeIndex(["2022-01-01", "2021-06-01"])  # 2022=down, 2021=bull
-    y_true = pd.Series([1.0, 0.0], index=idx)
-    proba = np.array([0.9, 0.1])
+    # Test with different label balance per regime to verify per-subset majority_baseline
+    # 2022 (down): y=[1.0, 0.0] -> majority_baseline = 0.5 (balanced)
+    # 2021 (bull): y=[1.0, 1.0, 0.0] -> majority_baseline = 2/3 (imbalanced, DIFFERENT from down)
+    idx = pd.DatetimeIndex(["2022-01-01", "2022-06-01", "2021-01-01", "2021-06-01", "2021-12-01"])
+    y_true = pd.Series([1.0, 0.0, 1.0, 1.0, 0.0], index=idx)
+    proba = np.array([0.9, 0.1, 0.9, 0.9, 0.1])
     result = breakdown_by_regime(y_true, proba, idx, threshold=0.5)
     assert set(result.index) == {"down", "bull"}
+    assert result.loc["down", "n"] == 2
+    assert result.loc["down", "accuracy"] == pytest.approx(1.0)
+    assert result.loc["down", "majority_baseline"] == pytest.approx(0.5)
+    assert result.loc["bull", "n"] == 3
+    assert result.loc["bull", "accuracy"] == pytest.approx(1.0)
+    assert result.loc["bull", "majority_baseline"] == pytest.approx(2 / 3)
+    # Verify that different regimes have different majority_baseline values
+    # (this catches regressions to a single global majority_baseline)
+    assert result.loc["down", "majority_baseline"] != result.loc["bull", "majority_baseline"]
 
 
 def test_sweep_confidence_threshold_returns_one_row_per_threshold():

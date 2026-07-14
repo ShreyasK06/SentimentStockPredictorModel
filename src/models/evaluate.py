@@ -24,32 +24,39 @@ def accuracy_at_threshold(y_true: pd.Series, proba: np.ndarray, threshold: float
     return {"accuracy": float(accuracy), "coverage": float(coverage), "n_predicted": n_predicted}
 
 
-def breakdown_by_year(y_true: pd.Series, proba: np.ndarray, index: pd.DatetimeIndex, threshold: float = 0.5) -> pd.DataFrame:
-    years = pd.DatetimeIndex(index).year
+def _breakdown_by_group(y_true: pd.Series, proba: np.ndarray, groups: np.ndarray, threshold: float = 0.5) -> pd.DataFrame:
+    """
+    Helper to compute accuracy breakdown by group.
+
+    Args:
+        y_true: Ground truth labels
+        proba: Model probabilities
+        groups: Already-computed grouping array/Series (e.g., years or regime labels)
+        threshold: Confidence threshold
+
+    Returns:
+        DataFrame with per-group accuracy, majority_baseline, and n
+    """
     rows = {}
-    for year in sorted(set(years)):
-        mask = years == year
+    for group in sorted(set(groups)):
+        mask = groups == group
         result = accuracy_at_threshold(pd.Series(np.asarray(y_true)[mask]), proba[mask], threshold)
-        rows[year] = {
+        rows[group] = {
             "accuracy": result["accuracy"],
             "majority_baseline": majority_baseline(pd.Series(np.asarray(y_true)[mask])),
             "n": int(mask.sum()),
         }
     return pd.DataFrame.from_dict(rows, orient="index")
+
+
+def breakdown_by_year(y_true: pd.Series, proba: np.ndarray, index: pd.DatetimeIndex, threshold: float = 0.5) -> pd.DataFrame:
+    years = pd.DatetimeIndex(index).year
+    return _breakdown_by_group(y_true, proba, years, threshold)
 
 
 def breakdown_by_regime(y_true: pd.Series, proba: np.ndarray, index: pd.DatetimeIndex, threshold: float = 0.5) -> pd.DataFrame:
     regimes = label_regime(index).values
-    rows = {}
-    for regime in sorted(set(regimes)):
-        mask = regimes == regime
-        result = accuracy_at_threshold(pd.Series(np.asarray(y_true)[mask]), proba[mask], threshold)
-        rows[regime] = {
-            "accuracy": result["accuracy"],
-            "majority_baseline": majority_baseline(pd.Series(np.asarray(y_true)[mask])),
-            "n": int(mask.sum()),
-        }
-    return pd.DataFrame.from_dict(rows, orient="index")
+    return _breakdown_by_group(y_true, proba, regimes, threshold)
 
 
 def sweep_confidence_threshold(y_true: pd.Series, proba: np.ndarray, thresholds=(0.5, 0.55, 0.6, 0.65, 0.7)) -> pd.DataFrame:
