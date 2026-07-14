@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from src.models.train import fit_logistic_regression, fit_lightgbm, predict_proba
+from src.models.train import fit_logistic_regression, fit_lightgbm, fit_random_forest, fit_xgboost, predict_proba
 
 
 def _separable_data(n=200, seed=0):
@@ -108,3 +108,33 @@ def test_predict_proba_does_not_refit_scaler_on_different_distribution():
     # Also verify that predict_proba returned valid output
     assert proba.shape == (len(X2),)
     assert np.all((proba >= 0) & (proba <= 1)), "Probabilities should be in [0, 1]"
+
+
+def test_fit_random_forest_returns_fitted_model():
+    X, y = _separable_data()
+    model = fit_random_forest(X, y)
+    assert hasattr(model, "predict_proba")
+
+
+def test_random_forest_learns_separable_pattern():
+    X, y = _separable_data()
+    model = fit_random_forest(X, y)
+    proba = predict_proba(model, X)
+    predicted = (proba >= 0.5).astype(float)
+    accuracy = (predicted == y.values).mean()
+    assert accuracy > 0.85
+
+
+def test_fit_xgboost_returns_fitted_model():
+    X, y = _separable_data()
+    model = fit_xgboost(X, y)
+    assert hasattr(model, "predict_proba")
+
+
+def test_xgboost_learns_separable_pattern():
+    X, y = _separable_data()
+    model = fit_xgboost(X, y)
+    proba = predict_proba(model, X)
+    predicted = (proba >= 0.5).astype(float)
+    accuracy = (predicted == y.values).mean()
+    assert accuracy > 0.85
