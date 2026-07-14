@@ -1,3 +1,4 @@
+import pytest
 import pandas as pd
 from src.models.splits import time_split
 
@@ -39,3 +40,9 @@ def test_time_split_preserves_row_order_no_shuffle():
     assert train.index.is_monotonic_increasing
     assert validate.index.is_monotonic_increasing
     assert test.index.is_monotonic_increasing
+
+
+def test_time_split_raises_when_train_end_not_before_validate_end():
+    df = _matrix()
+    with pytest.raises(ValueError):
+        time_split(df, train_end="2023-12-31", validate_end="2022-12-31")
