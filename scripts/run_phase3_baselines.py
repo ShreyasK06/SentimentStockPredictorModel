@@ -28,7 +28,6 @@ def main():
     lines.append("# Phase 3 Baseline Results\n")
     lines.append(f"Train: {train_df.index.min()} to {train_df.index.max()} ({len(train_df)} rows)\n")
     lines.append(f"Validate: {validate_df.index.min()} to {validate_df.index.max()} ({len(validate_df)} rows)\n")
-    lines.append(f"Test (untouched until this run): {test_df.index.min()} to {test_df.index.max()} ({len(test_df)} rows)\n")
 
     lr_model, scaler = fit_logistic_regression(X_train, y_train)
     lgbm_model = fit_lightgbm(X_train, y_train)
@@ -63,6 +62,7 @@ def main():
     lgbm_test_proba = predict_proba(lgbm_model, X_test)
 
     lines.append(f"\n## TEST SET RESULTS (2024-2025) - evaluated ONCE at threshold={chosen_threshold}\n")
+    lines.append(f"Test (untouched until this run): {test_df.index.min()} to {test_df.index.max()} ({len(test_df)} rows)\n")
     lines.append(f"Test-set majority baseline: {majority_baseline(y_test):.3f}\n")
     lines.append(f"Logistic regression: {accuracy_at_threshold(y_test, lr_test_proba, chosen_threshold)}\n")
     lines.append(f"LightGBM: {accuracy_at_threshold(y_test, lgbm_test_proba, chosen_threshold)}\n")
