@@ -23,9 +23,13 @@ def main():
 
     scored_news_by_ticker = {}
     for ticker in UNIVERSE:
-        print(f"Scoring sentiment for {ticker}...")
-        _load_or_score_sentiment(ticker)
-        scored_news_by_ticker[ticker] = load_parquet(ticker, config.SENTIMENT_DIR)
+        try:
+            print(f"Scoring sentiment for {ticker}...")
+            _load_or_score_sentiment(ticker)
+            scored_news_by_ticker[ticker] = load_parquet(ticker, config.SENTIMENT_DIR)
+        except Exception as exc:
+            print(f"WARNING: failed to process sentiment for {ticker}: {exc}")
+            continue
 
     matrix = build_feature_matrix(price_panel, scored_news_by_ticker, trading_days)
 
