@@ -5,7 +5,10 @@ MARKET_CLOSE_ET = pd.Timestamp("16:00").time()
 
 
 def assign_effective_trading_day(published_at: pd.Series, trading_days: pd.DatetimeIndex) -> pd.Series:
-    published_et = pd.to_datetime(published_at).dt.tz_convert("America/New_York")
+    published_at = pd.to_datetime(published_at)
+    if published_at.dt.tz is None:
+        published_at = published_at.dt.tz_localize("UTC")
+    published_et = published_at.dt.tz_convert("America/New_York")
     calendar_day_naive = published_et.dt.tz_localize(None).dt.normalize()
     before_close = published_et.dt.time < MARKET_CLOSE_ET
 

@@ -73,3 +73,21 @@ def test_before_close_in_summer_edt_stays_same_day():
     published = pd.Series([pd.Timestamp("2024-07-16 19:59:00", tz="UTC")])
     result = assign_effective_trading_day(published, trading_days)
     assert result.iloc[0] == pd.Timestamp("2024-07-16")
+
+
+def test_tz_naive_published_at_is_treated_as_utc():
+    # Phase 1's news schema documents published_at as UTC-aware, but there's
+    # no defensive guard against tz-naive input reaching this function. A
+    # tz-naive timestamp must be treated as UTC (not raise, not silently
+    # assume US/Eastern), matching the equivalent tz-aware UTC case from
+    # test_before_close_on_trading_day_stays_same_day.
+    trading_days = pd.DatetimeIndex(["2024-01-16", "2024-01-17", "2024-01-18"])
+    # Tz-naive, no tz= argument at all.
+    published_naive = pd.Series([pd.Timestamp("2024-01-17 20:59:00")])
+    result_naive = assign_effective_trading_day(published_naive, trading_days)
+
+    published_utc = pd.Series([pd.Timestamp("2024-01-17 20:59:00", tz="UTC")])
+    result_utc = assign_effective_trading_day(published_utc, trading_days)
+
+    assert result_naive.iloc[0] == pd.Timestamp("2024-01-17")
+    assert result_naive.iloc[0] == result_utc.iloc[0]

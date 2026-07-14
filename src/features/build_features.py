@@ -10,6 +10,20 @@ def build_ticker_feature_matrix(price_df: pd.DataFrame, scored_news: pd.DataFram
     ticker = price_df["ticker"].iloc[0]
     technical = compute_technical_features(price_df)
 
+    # technical.index comes from price_df.index, which per Phase 1's schema
+    # is tz-naive. Normalize trading_days the same way before comparing, so
+    # a tz-aware trading_days calendar doesn't produce a spurious mismatch.
+    trading_days_idx = pd.DatetimeIndex(trading_days)
+    if trading_days_idx.tz is not None:
+        trading_days_idx = trading_days_idx.tz_localize(None)
+    misaligned = technical.index.difference(trading_days_idx)
+    if len(misaligned) > 0:
+        print(
+            f"WARNING: {ticker} has {len(misaligned)} price date(s) not present in the "
+            f"trading_days calendar passed to build_ticker_feature_matrix - their sentiment "
+            f"will be zero-filled rather than computed. First few: {list(misaligned[:5])}"
+        )
+
     if not scored_news.empty:
         effective_day = assign_effective_trading_day(scored_news["published_at"], trading_days)
         daily_sentiment = aggregate_daily_sentiment(scored_news, effective_day)

@@ -72,6 +72,28 @@ def test_build_ticker_feature_matrix_handles_ticker_with_no_news():
     assert matrix["sentiment_roll7"].notna().all()
 
 
+def test_build_ticker_feature_matrix_warns_on_price_date_not_in_trading_days_calendar(capsys):
+    # Every existing fixture constructs trading_days = price_df.index, so the
+    # two indices are always identical by construction and misalignment is
+    # never exercised. Real Phase 1 price data can contain a non-trading-day
+    # row (this is exactly why Phase 1's find_misaligned_dates exists), which
+    # would otherwise silently zero-fill that row's sentiment with no warning.
+    price_df = _price_df()
+    scored_news = _scored_news()
+    missing_date = price_df.index[55]
+    trading_days = price_df.index.delete(55)
+    assert missing_date not in trading_days
+
+    matrix = build_ticker_feature_matrix(price_df, scored_news, trading_days)
+
+    captured = capsys.readouterr()
+    assert "WARNING" in captured.out
+    assert "AAPL" in captured.out
+    assert "1 price date(s)" in captured.out
+    # A loud warning, not a crash - the function must still complete.
+    assert len(matrix) > 0
+
+
 def test_build_feature_matrix_concatenates_all_tickers():
     price_panel = pd.concat([_price_df("AAPL"), _price_df("MSFT")])
     scored_news_by_ticker = {"AAPL": _scored_news("AAPL")}

@@ -11,6 +11,17 @@ def _load_or_score_sentiment(ticker: str) -> None:
     if cache_path.exists():
         return
     news = load_parquet(ticker, config.NEWS_DIR)
+    # Filter malformed/empty headlines BEFORE scoring, so `headline` and
+    # `published_at` stay aligned by construction. score_headlines() itself
+    # is already-approved Task 3 code (with existing tests) and is not
+    # modified here - a row-count mismatch between `news` and `scored` would
+    # otherwise silently misattribute published_at timestamps to the wrong
+    # headlines via the positional assignment below.
+    valid = news["headline"].apply(lambda h: isinstance(h, str) and h.strip() != "")
+    dropped = (~valid).sum()
+    if dropped > 0:
+        print(f"WARNING: {ticker} dropped {dropped} malformed/empty headline(s) before sentiment scoring")
+    news = news[valid]
     scored = score_headlines(list(news["headline"]))
     scored["published_at"] = news["published_at"].values
     scored["ticker"] = ticker
