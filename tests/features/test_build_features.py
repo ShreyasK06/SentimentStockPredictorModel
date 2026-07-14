@@ -3,7 +3,7 @@ import pandas as pd
 from src.features.build_features import build_ticker_feature_matrix, build_feature_matrix
 
 
-def _price_df(ticker="AAPL", n=80, start=100.0, step=0.5):
+def _price_df(ticker="AAPL", n=280, start=100.0, step=0.5):
     idx = pd.date_range("2024-01-02", periods=n, freq="B")
     close = pd.Series(start + step * np.arange(n), index=idx)
     volume = pd.Series(1_000_000 + 1000 * np.arange(n), index=idx)
@@ -16,7 +16,7 @@ def _price_df(ticker="AAPL", n=80, start=100.0, step=0.5):
 
 
 def _scored_news(ticker="AAPL"):
-    idx = pd.date_range("2024-01-02", periods=80, freq="B")
+    idx = pd.date_range("2024-01-02", periods=280, freq="B")
     # one headline published well before close on each of the first 5 trading days
     published = [pd.Timestamp(d, tz="America/New_York").replace(hour=9).tz_convert("UTC") for d in idx[:5]]
     return pd.DataFrame({
@@ -107,26 +107,28 @@ def test_full_pipeline_is_causal_no_lookahead():
     # altering price AND news data from day 60 onward must not change any
     # feature (not label - labels are intentionally forward-looking) at day < 60.
     #
-    # Row-index reasoning (n=80 price rows, indices 0..79):
-    #   - warmup: dist_from_ma50 needs a 50-row window -> first surviving row
-    #     is index 49 (matrix.index.min() >= price_df.index[49]).
-    #   - tail: label needs 10 future rows -> last surviving row is index 69
-    #     (matrix.index.max() <= price_df.index[-11] == price_df.index[69]).
-    #   So the surviving matrix spans rows 49..69 inclusive.
-    #   - the "day < 60" compared range within that span is rows 49..59.
+    # Row-index reasoning (n=280 price rows, indices 0..279):
+    #   - warmup: dist_from_ma50 needs 50 rows, dist_from_52w_extremes needs 252 rows
+    #     -> first surviving row is index 251 (accounting for 252-row window).
+    #   - tail: label needs 10 future rows -> last surviving row is index 269
+    #     (matrix.index.max() <= price_df.index[-11] == price_df.index[269]).
+    #   So the surviving matrix spans rows 251..269 inclusive.
+    #   - the "day < 60" compared range (mapped to absolute indices) still works
+    #     because we're comparing rows before trading_days[60], which are abundant.
     #   - headlines placed at day indices 50-55 land inside that compared
     #     range and are NEVER mutated, so they must produce genuine
     #     (non-zero) sentiment values in the compared rows.
     #   - headlines placed at day indices 60, 62, 65 land in the mutated tail
-    #     (rows 60..69) and ARE mutated, to prove a sentiment-only change
-    #     propagates through aggregate_daily_sentiment / add_rolling_sentiment
-    #     without leaking backward into rows < 60.
-    price_df = _price_df(n=80)
+    #     and ARE mutated, to prove a sentiment-only change propagates through
+    #     aggregate_daily_sentiment / add_rolling_sentiment without leaking backward.
+    price_df = _price_df(n=280)
     trading_days = price_df.index
 
-    before_indices = [50, 51, 52, 53, 54, 55]
+    # Use indices adjusted for the larger dataset and new warmup requirements
+    # (dist_from_52w_extremes needs 252 rows, so first valid row is at index 251)
+    before_indices = [252, 253, 254, 255, 256, 257]
     before_scores = [0.3, -0.1, 0.5, 0.0, 0.2, 0.4]
-    after_indices = [60, 62, 65]
+    after_indices = [260, 262, 265]
     after_scores = [0.4, -0.2, 0.1]
 
     scored_news = pd.concat([
@@ -142,8 +144,8 @@ def test_full_pipeline_is_causal_no_lookahead():
     ]
     matrix_before = build_ticker_feature_matrix(price_df, scored_news, trading_days)
 
-    day60 = trading_days[60]
-    common_index = matrix_before.index[matrix_before.index < day60]
+    day260 = trading_days[260]
+    common_index = matrix_before.index[matrix_before.index < day260]
     assert len(common_index) > 0
 
     # Sanity: the compared range must actually contain genuine, non-NaN,
@@ -154,13 +156,13 @@ def test_full_pipeline_is_causal_no_lookahead():
     assert matrix_before.loc[common_index, "sentiment_mean"].notna().any()
     assert matrix_before.loc[common_index, "sentiment_mean"].ne(0.0).any()
 
-    # Mutate price from day 60 onward (as before)...
+    # Mutate price from day 260 onward (after warmup but before tail)...
     price_df_modified = price_df.copy()
-    price_df_modified.loc[day60:, "Close"] *= 5
-    price_df_modified.loc[day60:, "Volume"] *= 5
+    price_df_modified.loc[day260:, "Close"] *= 5
+    price_df_modified.loc[day260:, "Volume"] *= 5
 
-    # ...AND mutate news effective on/after day 60: headlines before day 60
-    # are unchanged, headlines on/after day 60 have sentiment_score
+    # ...AND mutate news effective on/after day 260: headlines before day 260
+    # are unchanged, headlines on/after day 260 have sentiment_score
     # drastically altered (x -10).
     news_modified = pd.concat([
         _scored_news_at(trading_days, before_indices, before_scores),
@@ -176,10 +178,10 @@ def test_full_pipeline_is_causal_no_lookahead():
         matrix_after.loc[common_index, feature_cols],
     )
 
-    # Sanity: the day-60+ mutation (price AND news) must actually have had an
-    # effect somewhere at/after day 60 - otherwise "no effect before day 60"
+    # Sanity: the day-260+ mutation (price AND news) must actually have had an
+    # effect somewhere at/after day 260 - otherwise "no effect before day 260"
     # could trivially hold because the mutation did nothing anywhere.
-    tail_index = matrix_before.index[matrix_before.index >= day60]
+    tail_index = matrix_before.index[matrix_before.index >= day260]
     tail_index = tail_index.intersection(matrix_after.index)
     assert len(tail_index) > 0
     assert not matrix_before.loc[tail_index, feature_cols].equals(
@@ -188,6 +190,6 @@ def test_full_pipeline_is_causal_no_lookahead():
 
     # Specifically confirm the sentiment mutation (independent of the price
     # mutation, which alone would only move technical columns) changed
-    # sentiment_mean at day 60, where a mutated headline lives.
-    assert day60 in matrix_before.index and day60 in matrix_after.index
-    assert matrix_before.loc[day60, "sentiment_mean"] != matrix_after.loc[day60, "sentiment_mean"]
+    # sentiment_mean at day 260, where a mutated headline lives.
+    assert day260 in matrix_before.index and day260 in matrix_after.index
+    assert matrix_before.loc[day260, "sentiment_mean"] != matrix_after.loc[day260, "sentiment_mean"]
