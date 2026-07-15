@@ -20,7 +20,7 @@ def compute_rsi(close: pd.Series, window: int = 14) -> pd.Series:
 def compute_macd(close: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9) -> pd.DataFrame:
     ema_fast = close.ewm(span=fast, adjust=False).mean()
     ema_slow = close.ewm(span=slow, adjust=False).mean()
-    macd_line = ema_fast - ema_slow
+    macd_line = (ema_fast - ema_slow) / close
     signal_line = macd_line.ewm(span=signal, adjust=False).mean()
     hist = macd_line - signal_line
     return pd.DataFrame({"macd": macd_line, "macd_signal": signal_line, "macd_hist": hist})

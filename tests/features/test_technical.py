@@ -186,6 +186,33 @@ def test_day_of_week_cyclical_distinguishes_monday_and_friday():
     assert mon_val != fri_val
 
 
+def test_macd_is_normalized_by_close_not_raw_dollar_scale():
+    # Two fixtures with identical percentage price movements but very different
+    # absolute price levels (e.g. $10-range stock vs $500-range stock) should
+    # produce comparable-magnitude MACD values after normalization - a raw,
+    # unnormalized MACD would differ by roughly the price-level ratio (~50x).
+    idx = pd.date_range("2024-01-02", periods=40, freq="B")
+    low_price_close = pd.Series(10.0 + 0.1 * np.arange(40), index=idx)
+    high_price_close = pd.Series(500.0 + 5.0 * np.arange(40), index=idx)  # same % trend, 50x price level
+    low_price_df = pd.DataFrame({
+        "Close": low_price_close, "High": low_price_close + 0.1,
+        "Low": low_price_close - 0.1, "Volume": pd.Series(1_000_000, index=idx),
+    })
+    high_price_df = pd.DataFrame({
+        "Close": high_price_close, "High": high_price_close + 5.0,
+        "Low": high_price_close - 5.0, "Volume": pd.Series(1_000_000, index=idx),
+    })
+    low_macd = compute_technical_features(low_price_df)["macd"].dropna()
+    high_macd = compute_technical_features(high_price_df)["macd"].dropna()
+    # Same percentage trend at different price levels should give MACD values
+    # within the same order of magnitude (not a ~50x gap, which raw dollar-scale
+    # MACD would produce).
+    assert abs(low_macd.iloc[-1]) > 0
+    assert abs(high_macd.iloc[-1]) > 0
+    ratio = abs(high_macd.iloc[-1]) / abs(low_macd.iloc[-1])
+    assert 0.1 < ratio < 10  # same order of magnitude, not ~50x
+
+
 def test_new_indicators_are_causal_no_lookahead():
     df = _ohlcv_df(n=280)
     features_before = compute_technical_features(df)
