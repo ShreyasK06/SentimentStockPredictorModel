@@ -112,6 +112,12 @@ Random Forest: {'accuracy': 0.6368159203980099, 'coverage': 0.4077079107505071, 
 - On the OTHER (full-history) experiment in this same run, Random Forest was the best validation performer (0.551 vs 0.536 baseline) and then collapsed on test (0.485, well below the 0.561 baseline) — direct evidence RF is prone to this exact validation-to-test instability on this dataset.
 Given this pattern, the honest read is: RF's recent-window test result is most likely noise, not a genuine, reproducible edge. It should not be reported as "the model that works" without further validation (e.g., multiple random seeds, bootstrap confidence intervals) that this analysis did not perform.
 
+**ROBUSTNESS CHECK RESULT (scripts/run_rf_robustness_check.py, 50 random seeds, same train/test split):** confirms the above suspicion conclusively.
+- At threshold=0.6 (matching the original report): mean accuracy across 50 seeds is 0.6327 (vs baseline 0.6268), std 0.0181 - the original seed's 0.6368 is unremarkable, sitting well within one standard deviation of the mean. 33/50 seeds (66%) nominally beat baseline, but the margin is tiny and the metric is selection-biased (confidence thresholding chooses a different, non-random subset of rows each seed).
+- At threshold=0.5 (full coverage, no selection bias - every seed evaluated on all 493 test rows): mean accuracy is **0.5592**, dramatically below the 0.6268 baseline. **0 of 50 seeds ever beat baseline at full coverage.** Range across all 50 seeds: 0.5335-0.5781, entirely below 0.6268.
+
+**Conclusion:** Random Forest's raw predictive ability on this data is *worse* than the naive majority-class rule - not marginally better, not a coin flip, worse. The apparent test-set "win" under threshold=0.6 was a selection-mechanism artifact (confidence-thresholding on an imbalanced test set implicitly re-discovers a filtered approximation of the majority class), not genuine skill. This closes the question: no algorithm tried in this project (logistic regression, LightGBM, Random Forest, XGBoost) has a real, reproducible edge over the majority-class baseline on either the full-history or recent-window experiment.
+
 
 XGBoost: {'accuracy': 0.5386363636363637, 'coverage': 0.8924949290060852, 'n_predicted': 440}
 
