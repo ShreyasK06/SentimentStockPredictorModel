@@ -15,13 +15,14 @@ def accuracy_at_threshold(y_true: pd.Series, proba: np.ndarray, threshold: float
     coverage = n_predicted / len(y_true) if len(y_true) > 0 else 0.0
 
     if n_predicted == 0:
-        return {"accuracy": float("nan"), "coverage": coverage, "n_predicted": 0}
+        return {"accuracy": float("nan"), "coverage": coverage, "n_predicted": 0, "local_majority_baseline": float("nan")}
 
+    confident_actual = np.asarray(y_true)[confident]
     predicted = (proba[confident] >= 0.5).astype(float)
-    actual = np.asarray(y_true)[confident]
-    accuracy = (predicted == actual).mean()
+    accuracy = (predicted == confident_actual).mean()
+    local_baseline = majority_baseline(pd.Series(confident_actual))
 
-    return {"accuracy": float(accuracy), "coverage": float(coverage), "n_predicted": n_predicted}
+    return {"accuracy": float(accuracy), "coverage": float(coverage), "n_predicted": n_predicted, "local_majority_baseline": float(local_baseline)}
 
 
 def _breakdown_by_group(y_true: pd.Series, proba: np.ndarray, groups: np.ndarray, threshold: float = 0.5) -> pd.DataFrame:

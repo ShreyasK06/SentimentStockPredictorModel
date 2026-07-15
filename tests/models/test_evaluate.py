@@ -19,6 +19,9 @@ def test_accuracy_at_threshold_default_uses_all_predictions():
     assert result["accuracy"] == pytest.approx(0.5)  # 2/4 correct
     assert result["coverage"] == pytest.approx(1.0)
     assert result["n_predicted"] == 4
+    # At threshold=0.5 the confident subset is the entire set (balanced 2/2),
+    # so the local majority baseline should equal the full-set majority baseline.
+    assert result["local_majority_baseline"] == pytest.approx(0.5)
 
 
 def test_accuracy_at_threshold_abstains_below_confidence():
@@ -28,6 +31,26 @@ def test_accuracy_at_threshold_abstains_below_confidence():
     assert result["n_predicted"] == 2
     assert result["accuracy"] == pytest.approx(1.0)  # both confident predictions correct
     assert result["coverage"] == pytest.approx(0.5)
+    # Confident subset is [1.0, 0.0] -> perfectly balanced -> local majority baseline 0.5
+    assert result["local_majority_baseline"] == pytest.approx(0.5)
+
+
+def test_accuracy_at_threshold_local_majority_baseline_reflects_confident_subset_skew():
+    # Full set is roughly balanced (5 of class 1, 5 of class 0), but the "confident"
+    # subset (rows with extreme proba, |proba - 0.5| large) is skewed 4:1 toward class 1.
+    # This directly reproduces the bug: comparing confident-subset accuracy against the
+    # FULL-set majority baseline (0.5) is invalid when the confident subset is skewed
+    # (local majority baseline should be 0.8, not 0.5).
+    y_true = pd.Series([1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+    proba = np.array([
+        0.95, 0.92, 0.91, 0.90,  # 4 confident rows, all class 1 (correctly predicted)
+        0.05,                     # 1 confident row, class 0 (correctly predicted) -> 5 confident, 4/5 are class 1
+        0.55, 0.52, 0.51, 0.49,   # not confident at threshold 0.9
+        0.48,                     # not confident
+    ])
+    result = accuracy_at_threshold(y_true, proba, threshold=0.9)
+    assert result["n_predicted"] == 5
+    assert result["local_majority_baseline"] == pytest.approx(0.8)
 
 
 def test_breakdown_by_year_groups_correctly():
