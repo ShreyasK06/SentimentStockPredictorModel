@@ -1,3 +1,5 @@
+import pandas as pd
+
 from src import config
 from src.data.storage import load_parquet
 from src.models.splits import time_split
@@ -48,8 +50,10 @@ def run_experiment(name, cfg, matrix, lines):
     model = fit_lstm(X_seq_train, y_train, hidden_size=16, epochs=30)
     val_proba = predict_proba_lstm(model, X_seq_validate)
 
-    lines.append(f"\nValidation majority baseline: {majority_baseline(__import__('pandas').Series(y_validate)):.3f}\n")
-    lines.append(f"LSTM validation accuracy @0.5: {accuracy_at_threshold(__import__('pandas').Series(y_validate), val_proba, 0.5)}\n")
+    y_validate_series = pd.Series(y_validate)
+    lines.append(f"\nValidation majority baseline: {majority_baseline(y_validate_series):.3f}\n")
+    lines.append(f"LSTM validation accuracy @0.5: {accuracy_at_threshold(y_validate_series, val_proba, 0.5)}\n")
+    lines.append(f"LSTM validation accuracy @{CHOSEN_THRESHOLD} (matches the threshold used for test below): {accuracy_at_threshold(y_validate_series, val_proba, CHOSEN_THRESHOLD)}\n")
 
     print("=" * 60)
     print(f"[{name}] VALIDATION COMPLETE. Test set has NOT been touched yet.")
@@ -61,7 +65,7 @@ def run_experiment(name, cfg, matrix, lines):
         return
 
     test_proba = predict_proba_lstm(model, X_seq_test)
-    y_test_series = __import__('pandas').Series(y_test, index=test_index)
+    y_test_series = pd.Series(y_test, index=test_index)
 
     lines.append(f"\nTest ({test_index.min()} to {test_index.max()}, {len(y_test)} sequences) - evaluated ONCE at threshold={CHOSEN_THRESHOLD}\n")
     result = accuracy_at_threshold(y_test_series, test_proba, CHOSEN_THRESHOLD)
