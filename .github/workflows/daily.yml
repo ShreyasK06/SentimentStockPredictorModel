@@ -1,0 +1,64 @@
+name: Paper Trading Daily Pipeline
+
+on:
+  schedule:
+    # 14:30 UTC = 10:00 America/New_York during EDT (summer), 9:30 during EST
+    # (winter). GitHub Actions cron is fixed UTC and does not observe DST, so
+    # in winter this fires right at market open instead of 30 min after it -
+    # harmless (market orders at the open are fine) and documented here
+    # rather than hidden. The pipeline's own market-hours guard (Alpaca
+    # calendar) still no-ops on non-trading days.
+    - cron: "30 14 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "as_of_date override (YYYY-MM-DD), defaults to today"
+        required: false
+      dry_run:
+        description: "Run without submitting orders"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily pipeline
+        working-directory: paper-trader
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.date }}" ]; then ARGS="$ARGS --date ${{ github.event.inputs.date }}"; fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          python -m paper_trader.pipeline $ARGS
+
+      - name: Commit updated logs, reports, and live data cache
+        run: |
+          git config user.name "paper-trading-bot"
+          git config user.email "actions@github.com"
+          git add paper-trader/logs paper-trader/reports paper-trader/data
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: paper trading run $(date -u +%Y-%m-%d)"
+            git push
+          fi

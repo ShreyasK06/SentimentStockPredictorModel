@@ -1,0 +1,40 @@
+name: Paper Trading PR Checks
+
+on:
+  pull_request:
+    paths:
+      - "paper-trader/**"
+      - "src/**"
+      - "requirements.txt"
+      - ".github/workflows/daily.yml"
+      - ".github/workflows/pr-checks.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run paper-trader unit tests
+        working-directory: paper-trader
+        run: python -m pytest tests -v
+
+      - name: Dry-run the pipeline (no orders submitted)
+        working-directory: paper-trader
+        env:
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+        run: python -m paper_trader.pipeline --dry-run

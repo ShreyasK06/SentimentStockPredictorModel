@@ -1,0 +1,63 @@
+# Paper Trading Pipeline configuration.
+# All thresholds, sizing, and horizons live here so behavior changes don't
+# require code edits.
+
+universe:
+  # Reuses the 28-ticker large-cap universe already defined for the research
+  # pipeline (src/data/tickers.py in the repo root), so the paper trader and
+  # the research phases stay aligned on what "the universe" means.
+  source: research_repo   # research_repo | explicit
+  explicit_tickers: []     # only used when source: explicit
+
+model:
+  horizon_days: 10          # trading days ahead the direction label resolves at
+  up_threshold: 0.02        # matches src.features.labels.generate_labels defaults
+  down_threshold: 0.02
+  feature_set: base         # base = technical+sentiment columns; xs = base + cross-sectional
+  algorithm: lightgbm       # lightgbm | logistic_regression | random_forest | xgboost
+  confidence_threshold: 0.6 # a prediction is "confident" iff proba >= t or proba <= 1-t
+  sentiment_column: sentiment_roll3   # column used as the standalone sentiment direction signal
+
+strategies:
+  # Named strategies run side by side (Phase 6). "mode: trade" strategies place
+  # real (paper) orders through Alpaca; "mode: log_only" strategies predict and
+  # accrue forward-test evaluation data without touching capital.
+  - name: direction-daily
+    mode: trade
+    horizon_days: 10
+    confidence_threshold: 0.6
+    description: "Control strategy - current confidence-gated direction model, expected ~= baseline."
+  - name: volatility
+    mode: log_only
+    horizon_days: 5
+    confidence_threshold: 0.6
+    description: "Predicts high-move days regardless of direction. Log-only until it earns capital."
+  - name: post-event
+    mode: log_only
+    horizon_days: 3
+    confidence_threshold: 0.6
+    event_window_days: 3
+    description: "Only predicts in 1-3 day windows following a headline cluster (proxy for earnings/news events)."
+
+execution:
+  allow_short: false             # down-signals are skipped by default, not shorted
+  max_positions: 5               # max concurrent open positions across all trade-mode strategies
+  position_size_fraction: 0.10   # fixed fraction of equity per new position
+  order_fill_timeout_seconds: 300
+  starting_virtual_equity: 100000.0   # per-strategy virtual sub-ledger starting equity
+
+market_hours:
+  guard: true
+  submit_after_open_minutes: 30  # cron fires ~30 min after open; guard re-checks via Alpaca calendar
+
+paths:
+  # research_repo_root is relative to this file's directory (paper-trader/).
+  research_repo_root: ".."
+  logs_dir: "logs"
+  reports_dir: "reports"
+  data_dir: "data"
+
+evaluation:
+  rolling_window_days: 30
+  drift_margin: 0.03    # rolling hit rate below (always_up_baseline - margin) -> prominent warning
+  spy_ticker: SPY
