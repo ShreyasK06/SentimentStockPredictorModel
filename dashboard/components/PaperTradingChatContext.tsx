@@ -23,6 +23,7 @@ export function PaperTradingChatContext({
 }: PaperTradingChatContextProps) {
   const chatContextData = useMemo(
     () => ({
+      pageKind: "paper-trading" as const,
       startingEquity,
       currentEquity,
       openPositions: openPositions.map((p) => ({

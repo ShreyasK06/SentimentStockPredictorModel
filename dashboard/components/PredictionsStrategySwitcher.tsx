@@ -33,6 +33,7 @@ export function PredictionsStrategySwitcher({ strategies }: { strategies: Strate
   // specific questions about what's on screen instead of speaking generally.
   const chatContextData = useMemo(
     () => ({
+      pageKind: "predictions" as const,
       strategy: current.name,
       confidenceThreshold: current.confidenceThreshold,
       predictions: current.records.map((r) => ({

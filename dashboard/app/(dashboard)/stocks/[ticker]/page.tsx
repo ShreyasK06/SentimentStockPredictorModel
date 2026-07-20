@@ -1,12 +1,28 @@
 import { notFound } from "next/navigation";
-import { getQuote, getProfile, getMetrics, getCompanyNews } from "@/lib/finnhub";
+import { getQuote, getProfile, getMetrics, getCompanyNews, getPeers } from "@/lib/finnhub";
+import type { FinnhubMetrics } from "@/lib/finnhub";
 import { StatTile } from "@/components/StatTile";
 import { StatusPill } from "@/components/StatusPill";
 import { EmptyState } from "@/components/EmptyState";
 import { PriceChart } from "@/components/PriceChart";
-import { DcfCalculator } from "@/components/DcfCalculator";
+import { ValuationSection } from "@/components/ValuationSection";
+import type { CompRow } from "@/components/PeerComps";
 import { Reveal } from "@/components/Reveal";
 import { CountUp } from "@/components/CountUp";
+
+// Builds one comps-table row from a ticker's Finnhub metrics — the exact
+// same field references/fallbacks as this page's Key Statistics panel below
+// (peBasicExclExtraTTM ?? peTTM, currentEv/freeCashFlowTTM, etc.) so the
+// numbers are directly comparable, not re-derived differently.
+function toCompRow(ticker: string, m: FinnhubMetrics | null): CompRow {
+  return {
+    ticker,
+    pe: m?.peBasicExclExtraTTM ?? m?.peTTM ?? null,
+    evFcf: m?.["currentEv/freeCashFlowTTM"] ?? null,
+    currentRatio: m?.currentRatioAnnual ?? null,
+    netMargin: m?.netProfitMarginTTM ?? null,
+  };
+}
 
 // Calls the live Finnhub API server-side — Node.js runtime, always fresh.
 export const runtime = "nodejs";
@@ -44,11 +60,12 @@ export default async function StockDetailPage({
   const { ticker: rawTicker } = await params;
   const ticker = rawTicker.toUpperCase();
 
-  const [quote, profile, metrics, news] = await Promise.all([
+  const [quote, profile, metrics, news, peers] = await Promise.all([
     getQuote(ticker),
     getProfile(ticker),
     getMetrics(ticker),
     getCompanyNews(ticker),
+    getPeers(ticker),
   ]);
 
   if (!quote && !profile) {
@@ -58,6 +75,17 @@ export default async function StockDetailPage({
   const changePct = quote?.dp ?? null;
   const up = (changePct ?? 0) >= 0;
   const sharesOutstandingMillions = profile?.shareOutstanding ?? null;
+
+  // Peer comps: exclude the viewed ticker, cap to 5 remaining peers (avoid
+  // hammering Finnhub with unbounded parallel requests), fetch each peer's
+  // metrics via the existing getMetrics() in parallel, and pin the viewed
+  // ticker's own row first regardless of whether Finnhub returned any peers.
+  const peerTickers = peers.filter((p) => p.toUpperCase() !== ticker).slice(0, 5);
+  const peerMetricsList = await Promise.all(peerTickers.map((p) => getMetrics(p)));
+  const compRows: CompRow[] = [
+    toCompRow(ticker, metrics),
+    ...peerTickers.map((p, i) => toCompRow(p, peerMetricsList[i])),
+  ];
 
   return (
     <div className="flex flex-col gap-8">
@@ -159,14 +187,15 @@ export default async function StockDetailPage({
       </Reveal>
 
       <Reveal as="section" index={3}>
-        <DcfCalculator
+        <ValuationSection
           ticker={ticker}
+          quote={quote}
+          metrics={metrics}
           startingFcfPerShare={metrics?.cashFlowPerShareTTM ?? null}
           sharesOutstandingMillions={sharesOutstandingMillions}
           currentPrice={quote?.c ?? null}
           beta={metrics?.beta ?? null}
-          quote={quote}
-          metrics={metrics}
+          compRows={compRows}
         />
       </Reveal>
 

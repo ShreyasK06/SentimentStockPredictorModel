@@ -1,9 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CountUp } from "@/components/CountUp";
-import { useSetChatContext } from "@/lib/chat/ChatContext";
-import type { FinnhubQuote, FinnhubMetrics } from "@/lib/finnhub";
+
+// Reported up to the caller (see ValuationSection.tsx) on every change so a
+// single parent component can aggregate this alongside the reverse-DCF,
+// comps, and sum-of-parts results into one useSetChatContext call — this
+// component no longer registers chat context itself.
+export interface DcfResultForChat {
+  startingFcfPerShare: number;
+  growthPct: number;
+  discountPct: number;
+  terminalGrowthPct: number;
+  years: number;
+  intrinsicValue: number | null;
+  upsidePct: number | null;
+}
 
 interface DcfCalculatorProps {
   ticker: string;
@@ -11,16 +23,23 @@ interface DcfCalculatorProps {
   sharesOutstandingMillions: number | null;
   currentPrice: number | null;
   beta: number | null;
-  // Optional — only used to register Scout's live chat context for this
-  // page (see lib/chat/ChatContext.tsx). Not used by the DCF math itself.
-  quote?: FinnhubQuote | null;
-  metrics?: FinnhubMetrics | null;
+  // Optional — called with this calculator's live inputs/result on every
+  // change, so a parent can fold it into Scout's chat context alongside
+  // sibling valuation tools. Not used by the DCF math itself.
+  onResult?: (data: DcfResultForChat) => void;
 }
 
-const RISK_FREE_RATE = 4.3; // %, 10Y Treasury proxy
-const EQUITY_RISK_PREMIUM = 5; // %, standard long-run US equity premium assumption
+export const RISK_FREE_RATE = 4.3; // %, 10Y Treasury proxy
+export const EQUITY_RISK_PREMIUM = 5; // %, standard long-run US equity premium assumption
 
-function computeDcf(params: {
+// Shared discount-rate default so sibling valuation tools (reverse DCF,
+// sum-of-parts) start from the same CAPM-ish proxy as this calculator
+// instead of re-deriving it — call this rather than duplicating the formula.
+export function defaultDiscountPct(beta: number | null): number {
+  return Number((RISK_FREE_RATE + (beta ?? 1) * EQUITY_RISK_PREMIUM).toFixed(2));
+}
+
+export function computeDcf(params: {
   fcf0: number;
   growthPct: number;
   discountPct: number;
@@ -56,8 +75,7 @@ export function DcfCalculator({
   sharesOutstandingMillions,
   currentPrice,
   beta,
-  quote,
-  metrics,
+  onResult,
 }: DcfCalculatorProps) {
   const [fcf0, setFcf0] = useState(startingFcfPerShare ?? 0);
   // Finnhub's /stock/metric response has no direct "FCF growth" field, so we
@@ -65,9 +83,7 @@ export function DcfCalculator({
   // noisy proxy from a growth field that measures something else (revenue,
   // EPS) — the user can override this immediately since the field is live.
   const [growthPct, setGrowthPct] = useState(8);
-  const [discountPct, setDiscountPct] = useState(
-    Number((RISK_FREE_RATE + (beta ?? 1) * EQUITY_RISK_PREMIUM).toFixed(2))
-  );
+  const [discountPct, setDiscountPct] = useState(defaultDiscountPct(beta));
   const [terminalGrowthPct, setTerminalGrowthPct] = useState(2.5);
   const [years, setYears] = useState(5);
 
@@ -81,28 +97,22 @@ export function DcfCalculator({
       ? ((result.intrinsicValue - currentPrice) / currentPrice) * 100
       : null;
 
-  // Registers this stock detail page's live data — quote, key metrics, and
-  // the user's current (editable) DCF assumptions/result — as Scout's chat
-  // context (see lib/chat/ChatContext.tsx) so it can answer specific
-  // questions about what's on screen for this ticker.
-  const chatContextData = useMemo(
-    () => ({
-      ticker,
-      quote: quote ?? null,
-      metrics: metrics ?? null,
-      dcfInputs: {
-        startingFcfPerShare: fcf0,
-        growthPct,
-        discountPct,
-        terminalGrowthPct,
-        years,
-        intrinsicValue: result.valid ? result.intrinsicValue : null,
-        upsidePct,
-      },
-    }),
-    [ticker, quote, metrics, fcf0, growthPct, discountPct, terminalGrowthPct, years, result, upsidePct]
-  );
-  useSetChatContext(chatContextData);
+  // Reports this calculator's live (editable) inputs/result up to whichever
+  // parent owns Scout's chat context registration (see ValuationSection.tsx)
+  // so it can be folded in alongside the reverse-DCF, comps, and sum-of-parts
+  // tools into a single useSetChatContext call.
+  useEffect(() => {
+    onResult?.({
+      startingFcfPerShare: fcf0,
+      growthPct,
+      discountPct,
+      terminalGrowthPct,
+      years,
+      intrinsicValue: result.valid ? result.intrinsicValue : null,
+      upsidePct,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticker, fcf0, growthPct, discountPct, terminalGrowthPct, years, result, upsidePct]);
 
   return (
     <div className="rounded-[var(--radius-lg)] border border-rule bg-surface p-6 shadow-[var(--shadow-card)]">

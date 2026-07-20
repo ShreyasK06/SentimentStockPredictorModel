@@ -147,6 +147,17 @@ export interface FinnhubSearchResult {
   type: string;
 }
 
+// Confirmed live against /stock/peers?symbol=AAPL on 2026-07-20 — returns a
+// plain JSON array of ticker strings (the viewed ticker itself typically
+// included first), e.g. ["AAPL","DELL","SNDK","WDC","HPE","NTAP","P","HPQ",
+// "SMCI","IONQ","GPGI","DBD"]. Same defensive pattern as every other
+// function here: any failure or unexpected shape returns [], never throws.
+export async function getPeers(ticker: string): Promise<string[]> {
+  const res = await finnhubGet<string[]>("/stock/peers", { symbol: ticker });
+  if (!res || !Array.isArray(res)) return [];
+  return res;
+}
+
 export async function searchSymbol(query: string): Promise<FinnhubSearchResult[]> {
   if (!query.trim()) return [];
   const res = await finnhubGet<{ count: number; result: FinnhubSearchResult[] }>("/search", {

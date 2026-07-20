@@ -38,6 +38,7 @@ export function PredictionsPanel({
     () =>
       strategyName
         ? {
+            pageKind: "predictions" as const,
             strategy: strategyName,
             confidenceThreshold: defaultThreshold,
             predictions: records.map((r) => ({

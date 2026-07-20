@@ -7,6 +7,7 @@ import { StockCard } from "@/components/StockCard";
 import { AddStockSearch } from "@/components/AddStockSearch";
 import { EmptyState } from "@/components/EmptyState";
 import { Reveal } from "@/components/Reveal";
+import { StaticPageChatContext } from "@/components/StaticPageChatContext";
 
 // Reads parquet files from disk via hyparquet, and calls the live Finnhub
 // API for watchlist quotes — Node.js runtime required, always fresh.
@@ -37,6 +38,7 @@ export default async function StocksPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <StaticPageChatContext pageKind="stocks-list" />
       <Reveal index={0}>
         <h1 className="text-lg font-semibold text-ink">Stocks</h1>
         <p className="mt-1 text-sm text-ink-secondary">

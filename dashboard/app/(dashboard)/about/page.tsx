@@ -1,8 +1,10 @@
 import { Reveal } from "@/components/Reveal";
+import { StaticPageChatContext } from "@/components/StaticPageChatContext";
 
 export default function AboutPage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5 font-serif text-[15px] leading-relaxed text-ink">
+      <StaticPageChatContext pageKind="about" />
       <Reveal index={0}>
         <h1 className="font-mono text-lg font-semibold tracking-tight text-ink">About</h1>
         <p className="mt-1 font-mono text-xs uppercase tracking-widest text-ink-muted">

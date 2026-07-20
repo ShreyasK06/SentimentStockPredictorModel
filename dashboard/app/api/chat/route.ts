@@ -19,20 +19,49 @@ interface IncomingMessage {
   content: string;
 }
 
+type PageKind =
+  | "predictions"
+  | "stock-detail"
+  | "paper-trading"
+  | "stocks-list"
+  | "about"
+  | "unknown";
+
 interface PageContext {
   pathname?: string;
   pageDescription?: string;
-  // Anything beyond these two static fields is live per-page data a client
-  // component registered via useSetChatContext (see lib/chat/ChatContext.tsx)
-  // — e.g. {strategy, confidenceThreshold, predictions} on /predictions, or
-  // {ticker, quote, metrics, dcfInputs} on a stock detail page. Typed loosely
-  // here since the shape varies per page; buildSystemPrompt only checks
-  // whether any such extra keys are present, and the raw JSON is handed to
-  // the model verbatim so it can read the actual values.
+  // Which page *family* the user is on, independent of whether that page
+  // also shared live data — set by every useSetChatContext call site (see
+  // lib/chat/ChatContext.tsx), including pages with nothing rich to share
+  // (Stocks list, About), so PAGE_KIND_GUIDANCE below always has something
+  // to key off. Absent only for a page that hasn't registered any context
+  // at all (shouldn't happen for any page in this app, but handled safely).
+  pageKind?: PageKind;
+  // Anything beyond these static fields is live per-page data a client
+  // component registered via useSetChatContext — e.g. {strategy,
+  // confidenceThreshold, predictions} on /predictions, or {ticker, quote,
+  // metrics, dcfInputs} on a stock detail page. Typed loosely here since the
+  // shape varies per page; buildSystemPrompt only checks whether any such
+  // extra keys are present, and the raw JSON is handed to the model
+  // verbatim so it can read the actual values.
   [key: string]: unknown;
 }
 
-const STATIC_PAGE_CONTEXT_KEYS = new Set(["pathname", "pageDescription"]);
+const STATIC_PAGE_CONTEXT_KEYS = new Set(["pathname", "pageDescription", "pageKind"]);
+
+// Page-specific behavioral framing, spliced into the system prompt on top
+// of (never instead of) the hard rules below. Keyed by the pageKind every
+// useSetChatContext call site now sets. This is about *what Scout should
+// focus on and how it should frame answers* for this page family — the data
+// snapshot (if any) is handled separately by hasLivePageData/pageLine.
+const PAGE_KIND_GUIDANCE: Record<PageKind, string> = {
+  predictions: `Page focus: this is one of the prediction-table pages (Predictions, Weekly, 20-Day, or Volatility — each scoped to one or two strategies). Prioritize explaining what "direction," "confidence," and the confidence threshold mean, and help interpret the specific predictions in the live snapshot when present (e.g. which tickers clear the current threshold and why). Naturally note, when relevant, that no strategy shown here has a validated statistical edge.`,
+  "stock-detail": `Page focus: this is a stock detail page, centered on valuation. Be ready to walk through the DCF calculator's assumptions and, if the live snapshot includes reverse-DCF, comps, or sum-of-parts data, explain how those methods relate to each other and why they might disagree — that disagreement is informative, not a bug. The central idea to reinforce when relevant: no single valuation model produces "the true price" — every model is a set of assumptions translated into a number, and triangulating multiple methods (forward DCF, reverse DCF, peer comps, sum-of-parts) gives a better-grounded view than trusting any one of them. This is a reasonableness/sensitivity check, not an oracle.`,
+  "paper-trading": `Page focus: this is the real paper-trading ledger. Prioritize explaining equity (starting vs. realized), open positions, hit rate vs. the coin-flip/always-up baselines, and what "log-only" vs. "trade" mode means for the strategies involved.`,
+  "stocks-list": `Page focus: this is the watchlist/search page. Prioritize explaining how to search for and add a ticker, what the research-universe grid shows (the fixed 28-ticker universe vs. the user's own added watchlist), and how target-price tracking works if asked.`,
+  about: `Page focus: the user is reading the project's research narrative. Feel free to go into more depth than usual on the five research phases, the five algorithms tried, the no-validated-edge finding, and the self-caught evaluation bug if asked — this page already states all of it, so elaborating is safe, not a fabrication risk.`,
+  unknown: "",
+};
 
 function hasLivePageData(pageContext?: PageContext): boolean {
   if (!pageContext) return false;
@@ -65,6 +94,7 @@ function buildSystemPrompt(pageContext?: PageContext): string {
     const liveData = { ...pageContext };
     delete liveData.pathname;
     delete liveData.pageDescription;
+    delete liveData.pageKind;
     pageLine = `The user is currently viewing: ${pageContext.pathname}${
       pageContext.pageDescription ? ` — ${pageContext.pageDescription}` : ""
     }. You DO have a live snapshot of what's actually rendered on this page right now, given below as JSON — use it to answer specifically (exact numbers, tickers, statuses) rather than speaking generally. Only state numbers that appear in this snapshot or that the user typed themselves; if something isn't in it, say you don't have that particular value rather than guessing.
@@ -77,10 +107,12 @@ ${JSON.stringify(liveData)}`;
     }. You know what this page is *about*, but you do NOT have live access to the specific numbers, tickers, or values currently rendered there. Never pretend otherwise — if the user asks about a specific number on their screen, say plainly that you don't have live access to it, and offer to explain generally how that page/number works instead.`;
   }
 
+  const pageKindGuidance = pageContext?.pageKind ? PAGE_KIND_GUIDANCE[pageContext.pageKind] : "";
+
   return `You are Scout, the built-in assistant for "Stock Predictor," a research dashboard for a project that tested whether sentiment/technical signals predict stock direction. If asked your name, say you're Scout. You answer questions about the user's own data as it appears in this app (their predictions, watchlist, DCF calculator inputs, paper-trading ledger) and about how this project works. You are a research/data assistant, not a financial advisor.
 
 ${pageLine}
-
+${pageKindGuidance ? `\n${pageKindGuidance}\n` : ""}
 Hard rules, non-negotiable:
 1. Never give buy/sell recommendations, price targets, or any "should I..." investment advice, for any ticker, ever. If asked, decline plainly and redirect to what you CAN do: explain the data, explain how a number was computed, explain the DCF assumptions, or explain how the project's models/strategies work.
 2. Never fabricate a number. Only reference numbers that appear in the live page snapshot above (when present) or that the user explicitly shares with you in the conversation. On pages without a live snapshot, you do not have live access to whatever is currently rendered on their screen — say so honestly rather than inventing or guessing a value.
