@@ -1,0 +1,52 @@
+{
+  "date": "2026-07-17",
+  "dry_run": true,
+  "status": "ok",
+  "gap_detection": {
+    "gap_detected": false
+  },
+  "data_coverage": {
+    "status": "ok",
+    "proceed": true,
+    "use_news": true,
+    "tickers_missing_prices": [],
+    "tickers_missing_news": []
+  },
+  "alpaca_available": false,
+  "strategies": [
+    {
+      "strategy": "direction-daily",
+      "mode": "trade",
+      "n_predictions": 28,
+      "n_entries": 5,
+      "n_exits": 0,
+      "n_unfilled": 0,
+      "n_outcomes_resolved": 0
+    },
+    {
+      "strategy": "volatility",
+      "mode": "log_only",
+      "n_predictions": 28,
+      "n_entries": 0,
+      "n_exits": 0,
+      "n_unfilled": 0,
+      "n_outcomes_resolved": 0
+    },
+    {
+      "strategy": "post-event",
+      "mode": "log_only",
+      "n_predictions": 28,
+      "n_entries": 0,
+      "n_exits": 0,
+      "n_unfilled": 0,
+      "n_outcomes_resolved": 0
+    }
+  ],
+  "timings": {
+    "feature_build_seconds": 815.42,
+    "strategies_seconds": 118.55,
+    "report_seconds": 13.57,
+    "total_seconds": 948.42
+  },
+  "written_at_utc": "2026-07-18T20:18:59.992644+00:00"
+}

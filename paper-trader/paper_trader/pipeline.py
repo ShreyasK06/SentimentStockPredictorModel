@@ -49,9 +49,11 @@ def run_strategy(strategy_cfg: dict, as_of_date: str, dry_run: bool, alpaca, sha
     name = strategy_cfg["name"]
     model_cfg = dict(config.MODEL_CFG)
     model_cfg["horizon_days"] = strategy_cfg.get("horizon_days", model_cfg["horizon_days"])
+    model_cfg["algorithm"] = strategy_cfg.get("algorithm", model_cfg["algorithm"])
+    model_cfg["label_column"] = strategy_cfg.get("label_column", model_cfg.get("label_column", "label"))
     confidence_threshold = strategy_cfg.get("confidence_threshold", model_cfg["confidence_threshold"])
 
-    predictions = predict_from_state(shared_state, model_cfg=model_cfg)
+    predictions = predict_from_state(shared_state, model_cfg=model_cfg, label_column=model_cfg["label_column"])
     sentiments = sentiment_from_state(shared_state)
     n_logged = log_predictions(name, as_of_date, predictions, sentiments)
 

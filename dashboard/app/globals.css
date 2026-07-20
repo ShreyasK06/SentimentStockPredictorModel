@@ -1,0 +1,279 @@
+@import "tailwindcss";
+
+/* Research-ledger design system: lab-notebook / terminal aesthetic.
+   Light = ledger-green paper, dark = deep ink. Tokens are the validated
+   palette from the project's earlier showcase artifact — reused verbatim. */
+
+:root {
+  --bg: #eef3ec;
+  --surface: #f7faf5;
+  --ink: #16211c;
+  --ink-secondary: #46564c;
+  --ink-muted: #7c8c81;
+  --rule: #c7d2c6;
+  --accent: #b23a2e;
+  --accent-soft: #e8cfc9;
+  --chart-model: #0f6e96;
+  --chart-baseline: #b8720a;
+
+  /* Status pills — deliberately distinct hues from --accent and the chart
+     colors so "direction"/"confidence"/"open-closed" pills never get
+     confused with brand accent or chart series. */
+  --status-good: #4f6f4f;
+  --status-good-soft: #dfe8dc;
+  --status-serious: #92553a;
+  --status-serious-soft: #ecdccb;
+
+  --font-mono-stack: ui-monospace, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  --font-serif-stack: "Iowan Old Style", "Palatino Linotype", Palatino,
+    Georgia, serif;
+
+  /* Softening pass: shape + elevation tokens. Radius is theme-invariant
+     (corner rounding doesn't need to differ light/dark) so it lives here
+     only, unlike the color/shadow tokens below which are redefined in the
+     dark media query and both manual data-theme overrides. Consumed via
+     Tailwind arbitrary-value utilities, e.g. rounded-[var(--radius-lg)],
+     so components read the live custom property directly rather than a
+     baked-in Tailwind theme value. TabNav's tab bar and sliding underline
+     are the one deliberate exception — they stay sharp/rectangular and
+     must never pick up these tokens. */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Card elevation — applied to cards/panels/stat tiles/table containers
+     only, never to buttons. Light value here; dark value redefined below
+     following the same three-place pattern as --bg/--ink/etc. */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  /* Floating elevation — for elements that render *over* other content
+     without reserving layout space (dropdowns, popovers), as opposed to
+     --shadow-card's static in-flow cards. Noticeably heavier/more diffuse
+     than --shadow-card so a floating panel reads as clearly lifted above
+     whatever it's overlapping, not just another card sitting flush next to
+     one. Same three-place light/dark pattern as --shadow-card. */
+  --shadow-float: 0 12px 28px -6px rgba(0, 0, 0, 0.22), 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12201a;
+    --surface: #182a22;
+    --ink: #e7eee7;
+    --ink-secondary: #aebfb0;
+    --ink-muted: #7e9082;
+    --rule: #2c3d33;
+    --accent: #e0574a;
+    --accent-soft: #3a211e;
+    --chart-model: #3a9fc4;
+    --chart-baseline: #b07e32;
+
+    --status-good: #86ab84;
+    --status-good-soft: #22331f;
+    --status-serious: #c98f68;
+    --status-serious-soft: #3a2a1c;
+
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.25);
+    --shadow-float: 0 12px 28px -6px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.35);
+  }
+}
+
+/* Explicit theme override, set via <html data-theme="light|dark"> by
+   ThemeToggle (components/ThemeToggle.tsx) once the user makes a choice —
+   takes precedence over the prefers-color-scheme media query above in BOTH
+   directions because the attribute selector is more specific than a bare
+   :root, regardless of source order. Values mirror the tokens above
+   verbatim; the `prefers-color-scheme` block remains the fallback for
+   first-load / no stored preference. */
+:root[data-theme="dark"] {
+  --bg: #12201a;
+  --surface: #182a22;
+  --ink: #e7eee7;
+  --ink-secondary: #aebfb0;
+  --ink-muted: #7e9082;
+  --rule: #2c3d33;
+  --accent: #e0574a;
+  --accent-soft: #3a211e;
+  --chart-model: #3a9fc4;
+  --chart-baseline: #b07e32;
+
+  --status-good: #86ab84;
+  --status-good-soft: #22331f;
+  --status-serious: #c98f68;
+  --status-serious-soft: #3a2a1c;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-float: 0 12px 28px -6px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="light"] {
+  --bg: #eef3ec;
+  --surface: #f7faf5;
+  --ink: #16211c;
+  --ink-secondary: #46564c;
+  --ink-muted: #7c8c81;
+  --rule: #c7d2c6;
+  --accent: #b23a2e;
+  --accent-soft: #e8cfc9;
+  --chart-model: #0f6e96;
+  --chart-baseline: #b8720a;
+
+  --status-good: #4f6f4f;
+  --status-good-soft: #dfe8dc;
+  --status-serious: #92553a;
+  --status-serious-soft: #ecdccb;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-float: 0 12px 28px -6px rgba(0, 0, 0, 0.22), 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-rule: var(--rule);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-chart-model: var(--chart-model);
+  --color-chart-baseline: var(--chart-baseline);
+  --color-status-good: var(--status-good);
+  --color-status-good-soft: var(--status-good-soft);
+  --color-status-serious: var(--status-serious);
+  --color-status-serious-soft: var(--status-serious-soft);
+
+  --font-mono: var(--font-mono-stack);
+  --font-serif: var(--font-serif-stack);
+}
+
+* {
+  border-color: var(--rule);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-mono-stack);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------
+   Motion system — page-load reveal, skeleton shimmer, and shared
+   interactive-focus styling. Everything here is presentational only.
+   `prefers-reduced-motion: reduce` gets a single global override below
+   that collapses all CSS transitions/animations to effectively-instant,
+   plus explicit per-primitive fallbacks for belt-and-suspenders clarity.
+   JS-driven motion (CountUp, TickerTape) checks matchMedia itself.
+   --------------------------------------------------------------------- */
+
+/* Staggered page-section reveal. Apply via the <Reveal> wrapper component,
+   which sets --reveal-index per section (0, 1, 2, ...). Total time to last
+   section settled stays well under ~400ms even for a 5-section page. */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  animation: reveal-in 220ms ease-out both;
+  animation-delay: calc(var(--reveal-index, 0) * 40ms);
+}
+
+/* Skeleton loading primitive — a muted block with a shimmering sweep. */
+@keyframes skeleton-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--rule);
+  opacity: 0.45;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--surface) 70%, transparent),
+    transparent
+  );
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Ink-stamp motif — small rotated rubber-stamp graphic reused sparingly
+   (see Predictions "no edge" caveat, About page). */
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(-14deg) scale(1.4);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-8deg) scale(1);
+  }
+}
+
+.ink-stamp {
+  animation: stamp-in 380ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+/* Consistent visible focus state for every interactive element, filling
+   gaps where component-level focus styling only handled border/color. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .skeleton::after {
+    animation: none;
+    display: none;
+  }
+
+  .ink-stamp {
+    animation: none;
+    transform: rotate(-8deg);
+  }
+}

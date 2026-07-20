@@ -29,18 +29,24 @@ def _get_model_version() -> str:
     return _MODEL_VERSION
 
 
-def predict_from_state(state: dict, model_cfg: dict = None) -> dict:
+def predict_from_state(state: dict, model_cfg: dict = None, label_column: str = "label") -> dict:
     """
     Confidence-gated direction predictions for every ticker present in a
     pre-built feature state (see feature_store.build_universe_feature_state).
     Returns {ticker: {direction, confidence, proba_up, horizon, model_version,
     data_window_hash, as_of_date}}. Tickers whose predict-row was dropped for
     missing features (e.g. too little price history) are simply absent.
+
+    `label_column` selects which of training_matrix's label columns to train
+    against (feature_store's ALL_LABEL_COLUMNS - "label", "label_7d",
+    "label_20d_4pct"). Defaults to "label" so every existing caller that
+    omits it keeps training on the original 10d/2% column with exactly the
+    prior behavior.
     """
     model_cfg = model_cfg or config.MODEL_CFG
     cols = feature_columns(model_cfg["feature_set"])
 
-    training = state["training_matrix"].dropna(subset=cols + ["label"])
+    training = state["training_matrix"].dropna(subset=cols + [label_column])
     predict_rows = state["predict_rows"]
     if training.empty or predict_rows.empty:
         return {}
@@ -50,7 +56,7 @@ def predict_from_state(state: dict, model_cfg: dict = None) -> dict:
         return {}
 
     fit_func = _FIT_FUNCS[model_cfg["algorithm"]]
-    model, scaler = fit_func(training[cols], training["label"])
+    model, scaler = fit_func(training[cols], training[label_column])
     proba_up = predict_proba(model, predict_rows[cols], scaler=scaler)
 
     model_version = _get_model_version()

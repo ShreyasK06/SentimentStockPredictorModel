@@ -1,0 +1,72 @@
+{
+  "date": "2026-07-20",
+  "dry_run": true,
+  "status": "ok",
+  "gap_detection": {
+    "gap_detected": false,
+    "prior_run_date": "2026-07-18",
+    "gap_trading_days": 0
+  },
+  "data_coverage": {
+    "status": "ok",
+    "proceed": true,
+    "use_news": true,
+    "tickers_missing_prices": [],
+    "tickers_missing_news": []
+  },
+  "alpaca_available": false,
+  "strategies": [
+    {
+      "strategy": "direction-daily",
+      "mode": "trade",
+      "n_predictions": 28,
+      "n_entries": 0,
+      "n_exits": 0,
+      "n_unfilled": 0,
+      "n_outcomes_resolved": 0
+    },
+    {
+      "strategy": "volatility",
+      "mode": "log_only",
+      "n_predictions": 28,
+      "n_entries": 0,
+      "n_exits": 0,
+      "n_unfilled": 0,
+      "n_outcomes_resolved": 0
+    },
+    {
+      "strategy": "post-event",
+      "mode": "log_only",
+      "n_predictions": 28,
+      "n_entries": 0,
+      "n_exits": 0,
+      "n_unfilled": 0,
+      "n_outcomes_resolved": 0
+    },
+    {
+      "strategy": "weekly",
+      "mode": "log_only",
+      "n_predictions": 28,
+      "n_entries": 0,
+      "n_exits": 0,
+      "n_unfilled": 0,
+      "n_outcomes_resolved": 0
+    },
+    {
+      "strategy": "twenty-day",
+      "mode": "log_only",
+      "n_predictions": 28,
+      "n_entries": 0,
+      "n_exits": 0,
+      "n_unfilled": 0,
+      "n_outcomes_resolved": 0
+    }
+  ],
+  "timings": {
+    "feature_build_seconds": 143.68,
+    "strategies_seconds": 103.48,
+    "report_seconds": 2.47,
+    "total_seconds": 250.19
+  },
+  "written_at_utc": "2026-07-20T16:31:17.246423+00:00"
+}

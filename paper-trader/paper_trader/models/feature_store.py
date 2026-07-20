@@ -36,6 +36,41 @@ HISTORICAL_MATRIX_NAME = "feature_matrix_extended"
 # rather than true backfilled sentiment - see README "Known limitations".
 NEWS_LOOKBACK_DAYS = 14
 
+# Extra label columns generated alongside the global-config-driven "label"
+# column (10d/2%, still sourced from config.MODEL_CFG below so it keeps
+# tracking config.yaml's model: block exactly like before). These give the
+# "weekly" and "twenty-day" strategies (config.yaml) their own real trained
+# labels instead of reusing the direction-daily model under a different
+# display horizon. label_7d's 1.5% thresholds and label_20d_4pct's 4%
+# thresholds match the frozen historical matrix's own columns (see
+# scripts/add_7day_label.py and scripts/build_extended_feature_matrix.py) so
+# the live-appended rows computed here are labeled identically to history.
+LABEL_CONFIGS = [
+    # (column_name, horizon_days, up_threshold, down_threshold)
+    ("label_7d", 7, 0.015, 0.015),
+    ("label_20d_4pct", 20, 0.04, 0.04),
+]
+ALL_LABEL_COLUMNS = ["label"] + [c[0] for c in LABEL_CONFIGS]
+
+
+def _max_configured_horizon() -> int:
+    """
+    Widest horizon in play this run, for sizing the embargo cutoff
+    conservatively. Previously the embargo only considered the global
+    config.MODEL_CFG horizon (always 10), which was correct back when every
+    strategy secretly trained on the same 10-day label. Now that label_7d and
+    label_20d_4pct are real, independently-resolved labels, a stale/leaked
+    frozen-matrix row near the embargo boundary is a real risk for whichever
+    configured horizon is longest - so embargo against the max of: the global
+    default, every strategy's horizon_days override in config.yaml, and the
+    label configs' own horizons (label_20d_4pct's 20 is the long pole today).
+    The literal `20` floor keeps this safe even if config.yaml strategies are
+    edited to remove the twenty-day strategy outright.
+    """
+    strategy_horizons = [cfg.get("horizon_days", config.MODEL_CFG["horizon_days"]) for cfg in config.STRATEGIES_CFG]
+    label_horizons = [h for _, h, _, _ in LABEL_CONFIGS]
+    return max([20, config.MODEL_CFG["horizon_days"]] + strategy_horizons + label_horizons)
+
 
 def feature_columns(feature_set: str) -> list:
     cols = list(TECHNICAL_COLUMNS) + list(SENTIMENT_COLUMNS)
@@ -176,7 +211,7 @@ def build_universe_feature_state(tickers: list, as_of_date: str, feature_set: st
     down_threshold = config.MODEL_CFG["down_threshold"]
 
     historical = _load_historical_matrix()
-    historical = historical[historical.index <= _label_safe_cutoff(as_of_date, horizon)]
+    historical = historical[historical.index <= _label_safe_cutoff(as_of_date, _max_configured_horizon())]
     historical_max = historical.index.max() if not historical.empty else pd.Timestamp.min
 
     news_start = (pd.Timestamp(as_of_date) - pd.Timedelta(days=news_lookback_days)).date().isoformat()
@@ -213,6 +248,11 @@ def build_universe_feature_state(tickers: list, as_of_date: str, feature_set: st
         labels = generate_labels(price_series["Close"], horizon=horizon, up_threshold=up_threshold, down_threshold=down_threshold)
 
         matrix = technical.join(sentiment, how="left").join(labels, how="left")
+        for col_name, extra_horizon, extra_up, extra_down in LABEL_CONFIGS:
+            extra_labels = generate_labels(
+                price_series["Close"], horizon=extra_horizon, up_threshold=extra_up, down_threshold=extra_down
+            ).rename(col_name)
+            matrix = matrix.join(extra_labels, how="left")
         matrix["ticker"] = ticker
         sentiment_cols = ["sentiment_mean", "sentiment_std", "sentiment_roll3", "sentiment_roll7"]
         matrix[sentiment_cols] = matrix[sentiment_cols].fillna(0.0)
@@ -224,7 +264,23 @@ def build_universe_feature_state(tickers: list, as_of_date: str, feature_set: st
                 predict_rows.append(row)
 
         new_rows = matrix[matrix.index > historical_max]
-        trainable = new_rows.dropna(subset=TECHNICAL_COLUMNS + ["label"])
+        # Require complete technical features (unchanged, backward-compatible
+        # requirement), but only require *some* label to be resolvable rather
+        # than specifically "label" (10d). A label resolves once `horizon`
+        # future trading days exist past its row's date, so label_7d (7d)
+        # resolves first, "label" (10d) next, and label_20d_4pct (20d) last -
+        # meaning any row where label_20d_4pct is resolved always has "label"
+        # resolved too (20 future days implies 10), so the 20-day strategy was
+        # never starved by the old dropna. label_7d IS the starved case: a
+        # freshly-appended live row dated 7-9 trading days before as_of_date
+        # already has a resolvable label_7d but not yet a resolvable "label",
+        # and was being dropped from training_matrix entirely before the
+        # weekly strategy ever got a chance to use it. The per-strategy
+        # dropna in predictor.predict_from_state (keyed off each strategy's
+        # own label_column) still does the final, precise filtering, so
+        # keeping these extra rows around here is safe.
+        trainable = new_rows.dropna(subset=TECHNICAL_COLUMNS)
+        trainable = trainable[trainable[ALL_LABEL_COLUMNS].notna().any(axis=1)]
         live_frames.append(trainable)
 
     if feature_set == "xs" and any(not f.empty for f in live_frames):

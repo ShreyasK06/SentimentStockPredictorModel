@@ -38,6 +38,18 @@ strategies:
     confidence_threshold: 0.6
     event_window_days: 3
     description: "Only predicts in 1-3 day windows following a headline cluster (proxy for earnings/news events)."
+  - name: weekly
+    mode: log_only
+    horizon_days: 7
+    label_column: label_7d
+    confidence_threshold: 0.6
+    description: "Real 7-day-horizon model (own trained label, not a relabeled reuse of direction-daily). Log-only - no track record yet."
+  - name: twenty-day
+    mode: log_only
+    horizon_days: 20
+    label_column: label_20d_4pct
+    confidence_threshold: 0.6
+    description: "Real 20-day-horizon model. Phase 5 research already tested this exact label config (LightGBM, 20d/4%) and found no validated edge over baseline - this strategy exists as ongoing honest forward-test infrastructure, not a claim the earlier finding is being overturned."
 
 execution:
   allow_short: false             # down-signals are skipped by default, not shorted
