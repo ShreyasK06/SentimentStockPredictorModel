@@ -1,0 +1,269 @@
+{
+  "stage": "e",
+  "phase": "test",
+  "smoke": false,
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "HD",
+    "GOOGL",
+    "META",
+    "JPM",
+    "BAC",
+    "JNJ",
+    "ABBV",
+    "XOM",
+    "CVX",
+    "CAT",
+    "BA",
+    "WMT",
+    "PG"
+  ],
+  "n_tickers": 16,
+  "ticker_rule": "two largest market-cap tickers per sector (8 sectors), fixed before any results",
+  "feature_set": "price",
+  "features": {
+    "observed_reals": [
+      "log_ret_1d",
+      "log_volume_chg"
+    ],
+    "known_reals": [
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "month_sin",
+      "month_cos",
+      "day_of_month",
+      "days_to_next_trading_day"
+    ],
+    "known_categoricals": [
+      "day_of_week",
+      "month",
+      "is_month_end",
+      "is_quarter_end",
+      "is_pre_holiday"
+    ],
+    "static_categoricals": [
+      "ticker"
+    ],
+    "target": "log_ret_1d"
+  },
+  "hparams": {
+    "hidden_size": 32,
+    "attention_head_size": 2,
+    "dropout": 0.3,
+    "hidden_continuous_size": 8,
+    "learning_rate": 0.001,
+    "encoder_length": 20
+  },
+  "seeds": [
+    0
+  ],
+  "max_epochs": 15,
+  "limit_train_batches": null,
+  "quantiles": [
+    0.02,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.98
+  ],
+  "split_type": "held-out test (model trained <=2022-12-31, early stopping on 2023)",
+  "dates": {
+    "train_end": "2022-12-31",
+    "val_start": "2023-01-01",
+    "val_end": "2023-12-31",
+    "test_start": "2024-01-01",
+    "test_end": "2025-12-31"
+  },
+  "metrics": {
+    "1": {
+      "n": 7936,
+      "accuracy": 0.51953125,
+      "majority_baseline": 0.5362903225806451,
+      "always_up_accuracy": 0.5362903225806451,
+      "frac_pred_up": 0.7619707661290323,
+      "accuracy_minus_majority": -0.01675907258064513,
+      "step_pinball_loss": 0.0033066269288231508,
+      "step_median_mae": 0.01139243714358228,
+      "step_q10_q90_coverage": 0.8446320564516129
+    },
+    "3": {
+      "n": 7936,
+      "accuracy": 0.54296875,
+      "majority_baseline": 0.5601058467741935,
+      "always_up_accuracy": 0.5601058467741935,
+      "frac_pred_up": 0.772429435483871,
+      "accuracy_minus_majority": -0.017137096774193505,
+      "step_pinball_loss": 0.003295123692523615,
+      "step_median_mae": 0.011354756728432901,
+      "step_q10_q90_coverage": 0.8321572580645161
+    },
+    "5": {
+      "n": 7936,
+      "accuracy": 0.5471270161290323,
+      "majority_baseline": 0.5709425403225806,
+      "always_up_accuracy": 0.5709425403225806,
+      "frac_pred_up": 0.7584425403225806,
+      "accuracy_minus_majority": -0.023815524193548376,
+      "step_pinball_loss": 0.0032970699412948304,
+      "step_median_mae": 0.011350273249641414,
+      "step_q10_q90_coverage": 0.8238407258064516
+    },
+    "7": {
+      "n": 7936,
+      "accuracy": 0.5529233870967742,
+      "majority_baseline": 0.5786290322580645,
+      "always_up_accuracy": 0.5786290322580645,
+      "frac_pred_up": 0.7527721774193549,
+      "accuracy_minus_majority": -0.025705645161290258,
+      "step_pinball_loss": 0.003291726670054307,
+      "step_median_mae": 0.011315617007234107,
+      "step_q10_q90_coverage": 0.8225806451612904
+    }
+  },
+  "summary": {
+    "mean_accuracy": 0.5406376008064516,
+    "mean_majority_baseline": 0.5614919354838709
+  },
+  "pinball_loss_all_steps": 0.003296408866045088,
+  "epochs_trained": [
+    8
+  ],
+  "n_train_samples": 11696,
+  "thresholds": {
+    "1": 0.53,
+    "3": 0.57,
+    "5": 0.6,
+    "7": 0.55
+  },
+  "thresholded": {
+    "1": {
+      "accuracy": 0.5274177467597209,
+      "coverage": 0.37915826612903225,
+      "n_predicted": 3009,
+      "local_majority_baseline": 0.5373878364905285,
+      "threshold": 0.53,
+      "n_total": 7936,
+      "majority_baseline_all_rows": 0.5362903225806451
+    },
+    "3": {
+      "accuracy": 0.5359605911330049,
+      "coverage": 0.25579637096774194,
+      "n_predicted": 2030,
+      "local_majority_baseline": 0.5482758620689655,
+      "threshold": 0.57,
+      "n_total": 7936,
+      "majority_baseline_all_rows": 0.5601058467741935
+    },
+    "5": {
+      "accuracy": 0.5288461538461539,
+      "coverage": 0.20967741935483872,
+      "n_predicted": 1664,
+      "local_majority_baseline": 0.5516826923076923,
+      "threshold": 0.6,
+      "n_total": 7936,
+      "majority_baseline_all_rows": 0.5709425403225806
+    },
+    "7": {
+      "accuracy": 0.5654820341645396,
+      "coverage": 0.6417590725806451,
+      "n_predicted": 5093,
+      "local_majority_baseline": 0.5851168270174749,
+      "threshold": 0.55,
+      "n_total": 7936,
+      "majority_baseline_all_rows": 0.5786290322580645
+    }
+  },
+  "validation_reference_F3": {
+    "threshold_selected_on_this_fold": true,
+    "metrics_no_threshold": {
+      "1": {
+        "n": 3904,
+        "accuracy": 0.5302254098360656,
+        "majority_baseline": 0.5279200819672131,
+        "always_up_accuracy": 0.5279200819672131,
+        "frac_pred_up": 0.7605020491803278,
+        "accuracy_minus_majority": 0.0023053278688525136,
+        "step_pinball_loss": 0.003198671891190125,
+        "step_median_mae": 0.0112114391565017,
+        "step_q10_q90_coverage": 0.8570696721311475
+      },
+      "3": {
+        "n": 3904,
+        "accuracy": 0.5676229508196722,
+        "majority_baseline": 0.5448258196721312,
+        "always_up_accuracy": 0.5448258196721312,
+        "frac_pred_up": 0.7743340163934426,
+        "accuracy_minus_majority": 0.022797131147541005,
+        "step_pinball_loss": 0.0031694021255909187,
+        "step_median_mae": 0.011137884146572097,
+        "step_q10_q90_coverage": 0.845030737704918
+      },
+      "5": {
+        "n": 3904,
+        "accuracy": 0.586577868852459,
+        "majority_baseline": 0.5573770491803278,
+        "always_up_accuracy": 0.5573770491803278,
+        "frac_pred_up": 0.7607581967213115,
+        "accuracy_minus_majority": 0.029200819672131173,
+        "step_pinball_loss": 0.003147175238363394,
+        "step_median_mae": 0.011028503961789261,
+        "step_q10_q90_coverage": 0.8381147540983607
+      },
+      "7": {
+        "n": 3904,
+        "accuracy": 0.5963114754098361,
+        "majority_baseline": 0.5640368852459017,
+        "always_up_accuracy": 0.5640368852459017,
+        "frac_pred_up": 0.75,
+        "accuracy_minus_majority": 0.032274590163934413,
+        "step_pinball_loss": 0.0031384355130417113,
+        "step_median_mae": 0.010975873724898031,
+        "step_q10_q90_coverage": 0.8340163934426229
+      }
+    },
+    "thresholded": {
+      "1": {
+        "accuracy": 0.5559254327563249,
+        "coverage": 0.38473360655737704,
+        "n_predicted": 1502,
+        "local_majority_baseline": 0.5312916111850865,
+        "threshold": 0.53,
+        "n_total": 3904,
+        "majority_baseline_all_rows": 0.5279200819672131
+      },
+      "3": {
+        "accuracy": 0.6013779527559056,
+        "coverage": 0.26024590163934425,
+        "n_predicted": 1016,
+        "local_majority_baseline": 0.5413385826771654,
+        "threshold": 0.57,
+        "n_total": 3904,
+        "majority_baseline_all_rows": 0.5448258196721312
+      },
+      "5": {
+        "accuracy": 0.6242274412855378,
+        "coverage": 0.2072233606557377,
+        "n_predicted": 809,
+        "local_majority_baseline": 0.5377008652657602,
+        "threshold": 0.6,
+        "n_total": 3904,
+        "majority_baseline_all_rows": 0.5573770491803278
+      },
+      "7": {
+        "accuracy": 0.6197520991603359,
+        "coverage": 0.640625,
+        "n_predicted": 2501,
+        "local_majority_baseline": 0.5677728908436626,
+        "threshold": 0.55,
+        "n_total": 3904,
+        "majority_baseline_all_rows": 0.5640368852459017
+      }
+    }
+  },
+  "cv_mean_reference": null,
+  "wall_time_s": 13.229183435440063
+}

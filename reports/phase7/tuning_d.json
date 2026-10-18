@@ -1,0 +1,183 @@
+{
+  "stage": "d",
+  "partial": false,
+  "selection_rule": "max mean directional accuracy over horizons on F3 validation; tie -> lower pinball loss",
+  "feature_set": "price",
+  "feature_set_cv_scores": {
+    "price": 0.5396763084732094,
+    "technical": 0.5028531097481642,
+    "sentiment": 0.5335844311651756
+  },
+  "grid": {
+    "hidden_size": [
+      8,
+      16,
+      32
+    ],
+    "dropout": [
+      0.1,
+      0.3
+    ],
+    "learning_rate": [
+      0.001,
+      0.003
+    ],
+    "encoder_length": [
+      20,
+      60
+    ]
+  },
+  "configs_tried": [
+    {
+      "config_id": 0,
+      "hparams": {
+        "hidden_size": 16,
+        "attention_head_size": 2,
+        "dropout": 0.1,
+        "hidden_continuous_size": 8,
+        "learning_rate": 0.001,
+        "encoder_length": 30
+      },
+      "val_split": "F3 (2023)",
+      "val_mean_accuracy": 0.5460425204918032,
+      "val_mean_majority_baseline": 0.5485399590163935,
+      "val_pinball_loss": 0.0031799543460253204,
+      "epochs_trained": [
+        7
+      ],
+      "wall_time_s": 246.81204462051392,
+      "per_horizon_accuracy": {
+        "1": 0.524077868852459,
+        "3": 0.5422643442622951,
+        "5": 0.5581454918032787,
+        "7": 0.5596823770491803
+      }
+    },
+    {
+      "config_id": 1,
+      "hparams": {
+        "hidden_size": 8,
+        "attention_head_size": 1,
+        "dropout": 0.3,
+        "hidden_continuous_size": 8,
+        "learning_rate": 0.001,
+        "encoder_length": 20
+      },
+      "val_split": "F3 (2023)",
+      "val_mean_accuracy": 0.5535988729508197,
+      "val_mean_majority_baseline": 0.5485399590163935,
+      "val_pinball_loss": 0.0031531979132138426,
+      "epochs_trained": [
+        15
+      ],
+      "wall_time_s": 244.61259365081787,
+      "per_horizon_accuracy": {
+        "1": 0.5317622950819673,
+        "3": 0.555327868852459,
+        "5": 0.5625,
+        "7": 0.5648053278688525
+      }
+    },
+    {
+      "config_id": 2,
+      "hparams": {
+        "hidden_size": 8,
+        "attention_head_size": 1,
+        "dropout": 0.3,
+        "hidden_continuous_size": 8,
+        "learning_rate": 0.003,
+        "encoder_length": 20
+      },
+      "val_split": "F3 (2023)",
+      "val_mean_accuracy": 0.5671106557377049,
+      "val_mean_majority_baseline": 0.5485399590163935,
+      "val_pinball_loss": 0.003160819537039086,
+      "epochs_trained": [
+        11
+      ],
+      "wall_time_s": 168.9640212059021,
+      "per_horizon_accuracy": {
+        "1": 0.5391905737704918,
+        "3": 0.5635245901639344,
+        "5": 0.5809426229508197,
+        "7": 0.5847848360655737
+      }
+    },
+    {
+      "config_id": 3,
+      "hparams": {
+        "hidden_size": 8,
+        "attention_head_size": 1,
+        "dropout": 0.1,
+        "hidden_continuous_size": 8,
+        "learning_rate": 0.003,
+        "encoder_length": 20
+      },
+      "val_split": "F3 (2023)",
+      "val_mean_accuracy": 0.5528304303278688,
+      "val_mean_majority_baseline": 0.5485399590163935,
+      "val_pinball_loss": 0.0031710943720377645,
+      "epochs_trained": [
+        7
+      ],
+      "wall_time_s": 109.52514481544495,
+      "per_horizon_accuracy": {
+        "1": 0.5350922131147541,
+        "3": 0.5504610655737705,
+        "5": 0.5625,
+        "7": 0.5632684426229508
+      }
+    },
+    {
+      "config_id": 4,
+      "hparams": {
+        "hidden_size": 16,
+        "attention_head_size": 2,
+        "dropout": 0.1,
+        "hidden_continuous_size": 8,
+        "learning_rate": 0.001,
+        "encoder_length": 60
+      },
+      "val_split": "F3 (2023)",
+      "val_mean_accuracy": 0.5486680327868853,
+      "val_mean_majority_baseline": 0.5485399590163935,
+      "val_pinball_loss": 0.003149019209274429,
+      "epochs_trained": [
+        9
+      ],
+      "wall_time_s": 259.4956285953522,
+      "per_horizon_accuracy": {
+        "1": 0.5207479508196722,
+        "3": 0.5420081967213115,
+        "5": 0.5591700819672131,
+        "7": 0.5727459016393442
+      }
+    },
+    {
+      "config_id": 5,
+      "hparams": {
+        "hidden_size": 32,
+        "attention_head_size": 2,
+        "dropout": 0.3,
+        "hidden_continuous_size": 8,
+        "learning_rate": 0.001,
+        "encoder_length": 20
+      },
+      "val_split": "F3 (2023)",
+      "val_mean_accuracy": 0.5701844262295082,
+      "val_mean_majority_baseline": 0.5485399590163935,
+      "val_pinball_loss": 0.0031626804645052313,
+      "epochs_trained": [
+        8
+      ],
+      "wall_time_s": 159.82619524002075,
+      "per_horizon_accuracy": {
+        "1": 0.5302254098360656,
+        "3": 0.5676229508196722,
+        "5": 0.586577868852459,
+        "7": 0.5963114754098361
+      }
+    }
+  ],
+  "selected_config_id": 5
+}

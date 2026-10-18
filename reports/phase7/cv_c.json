@@ -1,0 +1,408 @@
+{
+  "stage": "c",
+  "phase": "cv",
+  "smoke": false,
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "HD",
+    "GOOGL",
+    "META",
+    "JPM",
+    "BAC",
+    "JNJ",
+    "ABBV",
+    "XOM",
+    "CVX",
+    "CAT",
+    "BA",
+    "WMT",
+    "PG"
+  ],
+  "n_tickers": 16,
+  "ticker_rule": "two largest market-cap tickers per sector (8 sectors), fixed before any results",
+  "feature_set": "sentiment",
+  "features": {
+    "observed_reals": [
+      "log_ret_1d",
+      "log_volume_chg",
+      "return_1d",
+      "return_5d",
+      "return_10d",
+      "return_20d",
+      "rsi_14",
+      "macd",
+      "macd_signal",
+      "macd_hist",
+      "volatility_20d",
+      "volume_ratio_20d",
+      "dist_from_ma50",
+      "bollinger_pctb",
+      "bollinger_bandwidth",
+      "atr_14_norm",
+      "stochastic_k",
+      "stochastic_d",
+      "obv_zscore",
+      "dist_from_52w_high",
+      "dist_from_52w_low",
+      "sent_mean",
+      "sent_pos_mean",
+      "sent_neg_mean",
+      "sent_neu_mean",
+      "article_count",
+      "sent_roll3",
+      "sent_roll7",
+      "has_news"
+    ],
+    "known_reals": [
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "month_sin",
+      "month_cos",
+      "day_of_month",
+      "days_to_next_trading_day"
+    ],
+    "known_categoricals": [
+      "day_of_week",
+      "month",
+      "is_month_end",
+      "is_quarter_end",
+      "is_pre_holiday"
+    ],
+    "static_categoricals": [
+      "ticker"
+    ],
+    "target": "log_ret_1d"
+  },
+  "hparams": {
+    "hidden_size": 16,
+    "attention_head_size": 2,
+    "dropout": 0.1,
+    "hidden_continuous_size": 8,
+    "learning_rate": 0.001,
+    "encoder_length": 30
+  },
+  "seeds": [
+    0
+  ],
+  "max_epochs": 15,
+  "limit_train_batches": null,
+  "quantiles": [
+    0.02,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.98
+  ],
+  "split_type": "walk-forward expanding CV, validation folds",
+  "folds": {
+    "F1": {
+      "split": "F1",
+      "dates": {
+        "train_end": "2020-12-31",
+        "val_start": "2021-01-01",
+        "val_end": "2021-12-31",
+        "test_start": null,
+        "test_end": null
+      },
+      "metrics": {
+        "1": {
+          "n": 3936,
+          "accuracy": 0.5276930894308943,
+          "majority_baseline": 0.5337906504065041,
+          "always_up_accuracy": 0.5337906504065041,
+          "frac_pred_up": 0.8755081300813008,
+          "accuracy_minus_majority": -0.0060975609756097615,
+          "step_pinball_loss": 0.0034060012197181804,
+          "step_median_mae": 0.01150032222148633,
+          "step_q10_q90_coverage": 0.8935467479674797
+        },
+        "3": {
+          "n": 3936,
+          "accuracy": 0.5602134146341463,
+          "majority_baseline": 0.5581808943089431,
+          "always_up_accuracy": 0.5581808943089431,
+          "frac_pred_up": 0.8689024390243902,
+          "accuracy_minus_majority": 0.00203252032520318,
+          "step_pinball_loss": 0.003405574846941385,
+          "step_median_mae": 0.01139013693099124,
+          "step_q10_q90_coverage": 0.8978658536585366
+        },
+        "5": {
+          "n": 3936,
+          "accuracy": 0.547510162601626,
+          "majority_baseline": 0.5617378048780488,
+          "always_up_accuracy": 0.5617378048780488,
+          "frac_pred_up": 0.834349593495935,
+          "accuracy_minus_majority": -0.014227642276422814,
+          "step_pinball_loss": 0.0033878232794745094,
+          "step_median_mae": 0.011274026155677339,
+          "step_q10_q90_coverage": 0.9026930894308943
+        },
+        "7": {
+          "n": 3936,
+          "accuracy": 0.5533536585365854,
+          "majority_baseline": 0.5777439024390244,
+          "always_up_accuracy": 0.5777439024390244,
+          "frac_pred_up": 0.8099593495934959,
+          "accuracy_minus_majority": -0.024390243902439046,
+          "step_pinball_loss": 0.003385896917278254,
+          "step_median_mae": 0.01124742935829938,
+          "step_q10_q90_coverage": 0.9039634146341463
+        }
+      },
+      "summary": {
+        "mean_accuracy": 0.5471925813008129,
+        "mean_majority_baseline": 0.5578633130081301
+      },
+      "pinball_loss_all_steps": 0.0033957551189160713,
+      "wall_time_s": 131.46431589126587,
+      "epochs_trained": [
+        5
+      ],
+      "best_val_loss": [
+        0.0067915101535618305
+      ],
+      "n_train_samples": 3488
+    },
+    "F2": {
+      "split": "F2",
+      "dates": {
+        "train_end": "2021-12-31",
+        "val_start": "2022-01-01",
+        "val_end": "2022-12-31",
+        "test_start": null,
+        "test_end": null
+      },
+      "metrics": {
+        "1": {
+          "n": 3920,
+          "accuracy": 0.4954081632653061,
+          "majority_baseline": 0.500765306122449,
+          "always_up_accuracy": 0.49923469387755104,
+          "frac_pred_up": 0.7375,
+          "accuracy_minus_majority": -0.005357142857142838,
+          "step_pinball_loss": 0.004705534491065287,
+          "step_median_mae": 0.016509196004135408,
+          "step_q10_q90_coverage": 0.800765306122449
+        },
+        "3": {
+          "n": 3920,
+          "accuracy": 0.48928571428571427,
+          "majority_baseline": 0.5056122448979592,
+          "always_up_accuracy": 0.5056122448979592,
+          "frac_pred_up": 0.7387755102040816,
+          "accuracy_minus_majority": -0.016326530612244927,
+          "step_pinball_loss": 0.004695363168416679,
+          "step_median_mae": 0.01647364194947917,
+          "step_q10_q90_coverage": 0.7974489795918367
+        },
+        "5": {
+          "n": 3920,
+          "accuracy": 0.49489795918367346,
+          "majority_baseline": 0.5005102040816326,
+          "always_up_accuracy": 0.49948979591836734,
+          "frac_pred_up": 0.7285714285714285,
+          "accuracy_minus_majority": -0.00561224489795914,
+          "step_pinball_loss": 0.004690349265957459,
+          "step_median_mae": 0.01645000358475723,
+          "step_q10_q90_coverage": 0.7989795918367347
+        },
+        "7": {
+          "n": 3920,
+          "accuracy": 0.4951530612244898,
+          "majority_baseline": 0.503061224489796,
+          "always_up_accuracy": 0.503061224489796,
+          "frac_pred_up": 0.7114795918367347,
+          "accuracy_minus_majority": -0.007908163265306134,
+          "step_pinball_loss": 0.0047015509391454815,
+          "step_median_mae": 0.016446402660785994,
+          "step_q10_q90_coverage": 0.7971938775510204
+        }
+      },
+      "summary": {
+        "mean_accuracy": 0.49368622448979593,
+        "mean_majority_baseline": 0.5024872448979592
+      },
+      "pinball_loss_all_steps": 0.004697405764808379,
+      "wall_time_s": 240.0482358932495,
+      "epochs_trained": [
+        7
+      ],
+      "best_val_loss": [
+        0.009394812397658825
+      ],
+      "n_train_samples": 7520
+    },
+    "F3": {
+      "split": "F3",
+      "dates": {
+        "train_end": "2022-12-31",
+        "val_start": "2023-01-01",
+        "val_end": "2023-12-31",
+        "test_start": null,
+        "test_end": null
+      },
+      "metrics": {
+        "1": {
+          "n": 3904,
+          "accuracy": 0.5294569672131147,
+          "majority_baseline": 0.5279200819672131,
+          "always_up_accuracy": 0.5279200819672131,
+          "frac_pred_up": 0.8447745901639344,
+          "accuracy_minus_majority": 0.0015368852459016757,
+          "step_pinball_loss": 0.003180045656517015,
+          "step_median_mae": 0.011271924433479725,
+          "step_q10_q90_coverage": 0.860655737704918
+        },
+        "3": {
+          "n": 3904,
+          "accuracy": 0.5614754098360656,
+          "majority_baseline": 0.5448258196721312,
+          "always_up_accuracy": 0.5448258196721312,
+          "frac_pred_up": 0.883452868852459,
+          "accuracy_minus_majority": 0.016649590163934413,
+          "step_pinball_loss": 0.0031617514566278527,
+          "step_median_mae": 0.011187623592815348,
+          "step_q10_q90_coverage": 0.8465676229508197
+        },
+        "5": {
+          "n": 3904,
+          "accuracy": 0.5706967213114754,
+          "majority_baseline": 0.5573770491803278,
+          "always_up_accuracy": 0.5573770491803278,
+          "frac_pred_up": 0.8980532786885246,
+          "accuracy_minus_majority": 0.013319672131147597,
+          "step_pinball_loss": 0.0031535598017441036,
+          "step_median_mae": 0.011093453336456447,
+          "step_q10_q90_coverage": 0.8455430327868853
+        },
+        "7": {
+          "n": 3904,
+          "accuracy": 0.5778688524590164,
+          "majority_baseline": 0.5640368852459017,
+          "always_up_accuracy": 0.5640368852459017,
+          "frac_pred_up": 0.9082991803278688,
+          "accuracy_minus_majority": 0.013831967213114749,
+          "step_pinball_loss": 0.0031507449066340096,
+          "step_median_mae": 0.011026523607448185,
+          "step_q10_q90_coverage": 0.8504098360655737
+        }
+      },
+      "summary": {
+        "mean_accuracy": 0.559874487704918,
+        "mean_majority_baseline": 0.5485399590163935
+      },
+      "pinball_loss_all_steps": 0.003160673766897711,
+      "wall_time_s": 350.84488224983215,
+      "epochs_trained": [
+        9
+      ],
+      "best_val_loss": [
+        0.006321347318589687
+      ],
+      "n_train_samples": 11536
+    }
+  },
+  "complete": true,
+  "cv_mean": {
+    "mean_accuracy": 0.5335844311651756,
+    "mean_majority_baseline": 0.5362968389741609,
+    "per_horizon": {
+      "1": {
+        "mean_accuracy": 0.5175194066364384,
+        "mean_majority_baseline": 0.5208253461653887
+      },
+      "3": {
+        "mean_accuracy": 0.5369915129186421,
+        "mean_majority_baseline": 0.5362063196263446
+      },
+      "5": {
+        "mean_accuracy": 0.5377016143655916,
+        "mean_majority_baseline": 0.539875019380003
+      },
+      "7": {
+        "mean_accuracy": 0.5421251907400305,
+        "mean_majority_baseline": 0.5482806707249074
+      }
+    },
+    "folds_included": [
+      "F1",
+      "F2",
+      "F3"
+    ]
+  },
+  "validation_F3": {
+    "split": "F3",
+    "dates": {
+      "train_end": "2022-12-31",
+      "val_start": "2023-01-01",
+      "val_end": "2023-12-31",
+      "test_start": null,
+      "test_end": null
+    },
+    "metrics": {
+      "1": {
+        "n": 3904,
+        "accuracy": 0.5294569672131147,
+        "majority_baseline": 0.5279200819672131,
+        "always_up_accuracy": 0.5279200819672131,
+        "frac_pred_up": 0.8447745901639344,
+        "accuracy_minus_majority": 0.0015368852459016757,
+        "step_pinball_loss": 0.003180045656517015,
+        "step_median_mae": 0.011271924433479725,
+        "step_q10_q90_coverage": 0.860655737704918
+      },
+      "3": {
+        "n": 3904,
+        "accuracy": 0.5614754098360656,
+        "majority_baseline": 0.5448258196721312,
+        "always_up_accuracy": 0.5448258196721312,
+        "frac_pred_up": 0.883452868852459,
+        "accuracy_minus_majority": 0.016649590163934413,
+        "step_pinball_loss": 0.0031617514566278527,
+        "step_median_mae": 0.011187623592815348,
+        "step_q10_q90_coverage": 0.8465676229508197
+      },
+      "5": {
+        "n": 3904,
+        "accuracy": 0.5706967213114754,
+        "majority_baseline": 0.5573770491803278,
+        "always_up_accuracy": 0.5573770491803278,
+        "frac_pred_up": 0.8980532786885246,
+        "accuracy_minus_majority": 0.013319672131147597,
+        "step_pinball_loss": 0.0031535598017441036,
+        "step_median_mae": 0.011093453336456447,
+        "step_q10_q90_coverage": 0.8455430327868853
+      },
+      "7": {
+        "n": 3904,
+        "accuracy": 0.5778688524590164,
+        "majority_baseline": 0.5640368852459017,
+        "always_up_accuracy": 0.5640368852459017,
+        "frac_pred_up": 0.9082991803278688,
+        "accuracy_minus_majority": 0.013831967213114749,
+        "step_pinball_loss": 0.0031507449066340096,
+        "step_median_mae": 0.011026523607448185,
+        "step_q10_q90_coverage": 0.8504098360655737
+      }
+    },
+    "summary": {
+      "mean_accuracy": 0.559874487704918,
+      "mean_majority_baseline": 0.5485399590163935
+    },
+    "pinball_loss_all_steps": 0.003160673766897711,
+    "wall_time_s": 350.84488224983215,
+    "epochs_trained": [
+      9
+    ],
+    "best_val_loss": [
+      0.006321347318589687
+    ],
+    "n_train_samples": 11536
+  },
+  "wall_time_s": 722.6817786693573
+}

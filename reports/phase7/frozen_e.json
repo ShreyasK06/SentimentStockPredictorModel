@@ -1,0 +1,11 @@
+{
+  "stage": "e",
+  "thresholds": {
+    "1": 0.53,
+    "3": 0.57,
+    "5": 0.6,
+    "7": 0.55
+  },
+  "selected_on": "F3 validation (2023)",
+  "min_coverage": 0.2
+}

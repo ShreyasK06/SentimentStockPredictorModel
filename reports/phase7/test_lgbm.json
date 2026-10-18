@@ -1,0 +1,237 @@
+{
+  "stage": "lgbm",
+  "phase": "test",
+  "smoke": false,
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "HD",
+    "GOOGL",
+    "META",
+    "JPM",
+    "BAC",
+    "JNJ",
+    "ABBV",
+    "XOM",
+    "CVX",
+    "CAT",
+    "BA",
+    "WMT",
+    "PG"
+  ],
+  "n_tickers": 16,
+  "ticker_rule": "two largest market-cap tickers per sector (8 sectors), fixed before any results",
+  "feature_set": "sentiment",
+  "features": {
+    "observed_reals": [
+      "log_ret_1d",
+      "log_volume_chg",
+      "return_1d",
+      "return_5d",
+      "return_10d",
+      "return_20d",
+      "rsi_14",
+      "macd",
+      "macd_signal",
+      "macd_hist",
+      "volatility_20d",
+      "volume_ratio_20d",
+      "dist_from_ma50",
+      "bollinger_pctb",
+      "bollinger_bandwidth",
+      "atr_14_norm",
+      "stochastic_k",
+      "stochastic_d",
+      "obv_zscore",
+      "dist_from_52w_high",
+      "dist_from_52w_low",
+      "sent_mean",
+      "sent_pos_mean",
+      "sent_neg_mean",
+      "sent_neu_mean",
+      "article_count",
+      "sent_roll3",
+      "sent_roll7",
+      "has_news",
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "month_sin",
+      "month_cos",
+      "day_of_month",
+      "days_to_next_trading_day",
+      "day_of_week",
+      "month",
+      "is_month_end",
+      "is_quarter_end",
+      "is_pre_holiday"
+    ],
+    "known_reals": [
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "month_sin",
+      "month_cos",
+      "day_of_month",
+      "days_to_next_trading_day"
+    ],
+    "known_categoricals": [
+      "day_of_week",
+      "month",
+      "is_month_end",
+      "is_quarter_end",
+      "is_pre_holiday"
+    ],
+    "static_categoricals": [
+      "ticker"
+    ],
+    "target": "log_ret_1d"
+  },
+  "hparams": null,
+  "seeds": [
+    0
+  ],
+  "max_epochs": 15,
+  "limit_train_batches": null,
+  "quantiles": [
+    0.02,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.98
+  ],
+  "lgbm_params": {
+    "n_estimators": 200,
+    "learning_rate": 0.03,
+    "num_leaves": 15,
+    "min_child_samples": 100,
+    "subsample": 0.8,
+    "subsample_freq": 1,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 1.0,
+    "verbose": -1
+  },
+  "split_type": "held-out test (trained <=2022-12-31 with t+h<=train_end)",
+  "dates": {
+    "train_end": "2022-12-31",
+    "val_start": "2023-01-01",
+    "val_end": "2023-12-31",
+    "test_start": "2024-01-01",
+    "test_end": "2025-12-31"
+  },
+  "metrics": {
+    "1": {
+      "n": 7936,
+      "accuracy": 0.5119707661290323,
+      "majority_baseline": 0.5362903225806451,
+      "always_up_accuracy": 0.5362903225806451,
+      "frac_pred_up": 0.635710685483871,
+      "accuracy_minus_majority": -0.024319556451612878
+    },
+    "3": {
+      "n": 7936,
+      "accuracy": 0.5253276209677419,
+      "majority_baseline": 0.5601058467741935,
+      "always_up_accuracy": 0.5601058467741935,
+      "frac_pred_up": 0.6910282258064516,
+      "accuracy_minus_majority": -0.034778225806451624
+    },
+    "5": {
+      "n": 7936,
+      "accuracy": 0.5197832661290323,
+      "majority_baseline": 0.5709425403225806,
+      "always_up_accuracy": 0.5709425403225806,
+      "frac_pred_up": 0.6600302419354839,
+      "accuracy_minus_majority": -0.051159274193548376
+    },
+    "7": {
+      "n": 7936,
+      "accuracy": 0.5394405241935484,
+      "majority_baseline": 0.5786290322580645,
+      "always_up_accuracy": 0.5786290322580645,
+      "frac_pred_up": 0.692414314516129,
+      "accuracy_minus_majority": -0.039188508064516125
+    }
+  },
+  "summary": {
+    "mean_accuracy": 0.5241305443548386,
+    "mean_majority_baseline": 0.5614919354838709
+  },
+  "validation_reference_F3": {
+    "split": "F3",
+    "dates": {
+      "train_end": "2022-12-31",
+      "val_start": "2023-01-01",
+      "val_end": "2023-12-31",
+      "test_start": null,
+      "test_end": null
+    },
+    "metrics": {
+      "1": {
+        "n": 3904,
+        "accuracy": 0.5076844262295082,
+        "majority_baseline": 0.5279200819672131,
+        "always_up_accuracy": 0.5279200819672131,
+        "frac_pred_up": 0.6103995901639344,
+        "accuracy_minus_majority": -0.020235655737704916
+      },
+      "3": {
+        "n": 3904,
+        "accuracy": 0.5320184426229508,
+        "majority_baseline": 0.5448258196721312,
+        "always_up_accuracy": 0.5448258196721312,
+        "frac_pred_up": 0.649077868852459,
+        "accuracy_minus_majority": -0.012807377049180335
+      },
+      "5": {
+        "n": 3904,
+        "accuracy": 0.5578893442622951,
+        "majority_baseline": 0.5573770491803278,
+        "always_up_accuracy": 0.5573770491803278,
+        "frac_pred_up": 0.6357581967213115,
+        "accuracy_minus_majority": 0.0005122950819672623
+      },
+      "7": {
+        "n": 3904,
+        "accuracy": 0.5689036885245902,
+        "majority_baseline": 0.5640368852459017,
+        "always_up_accuracy": 0.5640368852459017,
+        "frac_pred_up": 0.6667520491803278,
+        "accuracy_minus_majority": 0.004866803278688492
+      }
+    },
+    "summary": {
+      "mean_accuracy": 0.541623975409836,
+      "mean_majority_baseline": 0.5485399590163935
+    }
+  },
+  "cv_mean_reference": {
+    "mean_accuracy": 0.5212870492392612,
+    "mean_majority_baseline": 0.5362968389741609,
+    "per_horizon": {
+      "1": {
+        "mean_accuracy": 0.501615731258517,
+        "mean_majority_baseline": 0.5208253461653887
+      },
+      "3": {
+        "mean_accuracy": 0.5157427080188334,
+        "mean_majority_baseline": 0.5362063196263446
+      },
+      "5": {
+        "mean_accuracy": 0.5264932292389166,
+        "mean_majority_baseline": 0.539875019380003
+      },
+      "7": {
+        "mean_accuracy": 0.5412965284407779,
+        "mean_majority_baseline": 0.5482806707249074
+      }
+    },
+    "folds_included": [
+      "F1",
+      "F2",
+      "F3"
+    ]
+  },
+  "wall_time_s": 4.164777994155884
+}

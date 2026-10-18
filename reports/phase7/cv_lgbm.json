@@ -1,0 +1,339 @@
+{
+  "stage": "lgbm",
+  "phase": "cv",
+  "smoke": false,
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "HD",
+    "GOOGL",
+    "META",
+    "JPM",
+    "BAC",
+    "JNJ",
+    "ABBV",
+    "XOM",
+    "CVX",
+    "CAT",
+    "BA",
+    "WMT",
+    "PG"
+  ],
+  "n_tickers": 16,
+  "ticker_rule": "two largest market-cap tickers per sector (8 sectors), fixed before any results",
+  "feature_set": "sentiment",
+  "features": {
+    "observed_reals": [
+      "log_ret_1d",
+      "log_volume_chg",
+      "return_1d",
+      "return_5d",
+      "return_10d",
+      "return_20d",
+      "rsi_14",
+      "macd",
+      "macd_signal",
+      "macd_hist",
+      "volatility_20d",
+      "volume_ratio_20d",
+      "dist_from_ma50",
+      "bollinger_pctb",
+      "bollinger_bandwidth",
+      "atr_14_norm",
+      "stochastic_k",
+      "stochastic_d",
+      "obv_zscore",
+      "dist_from_52w_high",
+      "dist_from_52w_low",
+      "sent_mean",
+      "sent_pos_mean",
+      "sent_neg_mean",
+      "sent_neu_mean",
+      "article_count",
+      "sent_roll3",
+      "sent_roll7",
+      "has_news",
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "month_sin",
+      "month_cos",
+      "day_of_month",
+      "days_to_next_trading_day",
+      "day_of_week",
+      "month",
+      "is_month_end",
+      "is_quarter_end",
+      "is_pre_holiday"
+    ],
+    "known_reals": [
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "month_sin",
+      "month_cos",
+      "day_of_month",
+      "days_to_next_trading_day"
+    ],
+    "known_categoricals": [
+      "day_of_week",
+      "month",
+      "is_month_end",
+      "is_quarter_end",
+      "is_pre_holiday"
+    ],
+    "static_categoricals": [
+      "ticker"
+    ],
+    "target": "log_ret_1d"
+  },
+  "hparams": null,
+  "seeds": [
+    0
+  ],
+  "max_epochs": 15,
+  "limit_train_batches": null,
+  "quantiles": [
+    0.02,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.98
+  ],
+  "lgbm_params": {
+    "n_estimators": 200,
+    "learning_rate": 0.03,
+    "num_leaves": 15,
+    "min_child_samples": 100,
+    "subsample": 0.8,
+    "subsample_freq": 1,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 1.0,
+    "verbose": -1
+  },
+  "split_type": "walk-forward expanding CV, validation folds",
+  "folds": {
+    "F1": {
+      "split": "F1",
+      "dates": {
+        "train_end": "2020-12-31",
+        "val_start": "2021-01-01",
+        "val_end": "2021-12-31",
+        "test_start": null,
+        "test_end": null
+      },
+      "metrics": {
+        "1": {
+          "n": 3936,
+          "accuracy": 0.5076219512195121,
+          "majority_baseline": 0.5337906504065041,
+          "always_up_accuracy": 0.5337906504065041,
+          "frac_pred_up": 0.5495426829268293,
+          "accuracy_minus_majority": -0.02616869918699194
+        },
+        "3": {
+          "n": 3936,
+          "accuracy": 0.5236280487804879,
+          "majority_baseline": 0.5581808943089431,
+          "always_up_accuracy": 0.5581808943089431,
+          "frac_pred_up": 0.6102642276422764,
+          "accuracy_minus_majority": -0.03455284552845528
+        },
+        "5": {
+          "n": 3936,
+          "accuracy": 0.5228658536585366,
+          "majority_baseline": 0.5617378048780488,
+          "always_up_accuracy": 0.5617378048780488,
+          "frac_pred_up": 0.5632621951219512,
+          "accuracy_minus_majority": -0.03887195121951226
+        },
+        "7": {
+          "n": 3936,
+          "accuracy": 0.5284552845528455,
+          "majority_baseline": 0.5777439024390244,
+          "always_up_accuracy": 0.5777439024390244,
+          "frac_pred_up": 0.551829268292683,
+          "accuracy_minus_majority": -0.04928861788617889
+        }
+      },
+      "summary": {
+        "mean_accuracy": 0.5206427845528455,
+        "mean_majority_baseline": 0.5578633130081301
+      }
+    },
+    "F2": {
+      "split": "F2",
+      "dates": {
+        "train_end": "2021-12-31",
+        "val_start": "2022-01-01",
+        "val_end": "2022-12-31",
+        "test_start": null,
+        "test_end": null
+      },
+      "metrics": {
+        "1": {
+          "n": 3920,
+          "accuracy": 0.4895408163265306,
+          "majority_baseline": 0.500765306122449,
+          "always_up_accuracy": 0.49923469387755104,
+          "frac_pred_up": 0.6,
+          "accuracy_minus_majority": -0.011224489795918335
+        },
+        "3": {
+          "n": 3920,
+          "accuracy": 0.4915816326530612,
+          "majority_baseline": 0.5056122448979592,
+          "always_up_accuracy": 0.5056122448979592,
+          "frac_pred_up": 0.6854591836734694,
+          "accuracy_minus_majority": -0.014030612244897989
+        },
+        "5": {
+          "n": 3920,
+          "accuracy": 0.4987244897959184,
+          "majority_baseline": 0.5005102040816326,
+          "always_up_accuracy": 0.49948979591836734,
+          "frac_pred_up": 0.6594387755102041,
+          "accuracy_minus_majority": -0.0017857142857142239
+        },
+        "7": {
+          "n": 3920,
+          "accuracy": 0.5265306122448979,
+          "majority_baseline": 0.503061224489796,
+          "always_up_accuracy": 0.503061224489796,
+          "frac_pred_up": 0.6816326530612244,
+          "accuracy_minus_majority": 0.02346938775510199
+        }
+      },
+      "summary": {
+        "mean_accuracy": 0.501594387755102,
+        "mean_majority_baseline": 0.5024872448979592
+      }
+    },
+    "F3": {
+      "split": "F3",
+      "dates": {
+        "train_end": "2022-12-31",
+        "val_start": "2023-01-01",
+        "val_end": "2023-12-31",
+        "test_start": null,
+        "test_end": null
+      },
+      "metrics": {
+        "1": {
+          "n": 3904,
+          "accuracy": 0.5076844262295082,
+          "majority_baseline": 0.5279200819672131,
+          "always_up_accuracy": 0.5279200819672131,
+          "frac_pred_up": 0.6103995901639344,
+          "accuracy_minus_majority": -0.020235655737704916
+        },
+        "3": {
+          "n": 3904,
+          "accuracy": 0.5320184426229508,
+          "majority_baseline": 0.5448258196721312,
+          "always_up_accuracy": 0.5448258196721312,
+          "frac_pred_up": 0.649077868852459,
+          "accuracy_minus_majority": -0.012807377049180335
+        },
+        "5": {
+          "n": 3904,
+          "accuracy": 0.5578893442622951,
+          "majority_baseline": 0.5573770491803278,
+          "always_up_accuracy": 0.5573770491803278,
+          "frac_pred_up": 0.6357581967213115,
+          "accuracy_minus_majority": 0.0005122950819672623
+        },
+        "7": {
+          "n": 3904,
+          "accuracy": 0.5689036885245902,
+          "majority_baseline": 0.5640368852459017,
+          "always_up_accuracy": 0.5640368852459017,
+          "frac_pred_up": 0.6667520491803278,
+          "accuracy_minus_majority": 0.004866803278688492
+        }
+      },
+      "summary": {
+        "mean_accuracy": 0.541623975409836,
+        "mean_majority_baseline": 0.5485399590163935
+      }
+    }
+  },
+  "complete": true,
+  "cv_mean": {
+    "mean_accuracy": 0.5212870492392612,
+    "mean_majority_baseline": 0.5362968389741609,
+    "per_horizon": {
+      "1": {
+        "mean_accuracy": 0.501615731258517,
+        "mean_majority_baseline": 0.5208253461653887
+      },
+      "3": {
+        "mean_accuracy": 0.5157427080188334,
+        "mean_majority_baseline": 0.5362063196263446
+      },
+      "5": {
+        "mean_accuracy": 0.5264932292389166,
+        "mean_majority_baseline": 0.539875019380003
+      },
+      "7": {
+        "mean_accuracy": 0.5412965284407779,
+        "mean_majority_baseline": 0.5482806707249074
+      }
+    },
+    "folds_included": [
+      "F1",
+      "F2",
+      "F3"
+    ]
+  },
+  "validation_F3": {
+    "split": "F3",
+    "dates": {
+      "train_end": "2022-12-31",
+      "val_start": "2023-01-01",
+      "val_end": "2023-12-31",
+      "test_start": null,
+      "test_end": null
+    },
+    "metrics": {
+      "1": {
+        "n": 3904,
+        "accuracy": 0.5076844262295082,
+        "majority_baseline": 0.5279200819672131,
+        "always_up_accuracy": 0.5279200819672131,
+        "frac_pred_up": 0.6103995901639344,
+        "accuracy_minus_majority": -0.020235655737704916
+      },
+      "3": {
+        "n": 3904,
+        "accuracy": 0.5320184426229508,
+        "majority_baseline": 0.5448258196721312,
+        "always_up_accuracy": 0.5448258196721312,
+        "frac_pred_up": 0.649077868852459,
+        "accuracy_minus_majority": -0.012807377049180335
+      },
+      "5": {
+        "n": 3904,
+        "accuracy": 0.5578893442622951,
+        "majority_baseline": 0.5573770491803278,
+        "always_up_accuracy": 0.5573770491803278,
+        "frac_pred_up": 0.6357581967213115,
+        "accuracy_minus_majority": 0.0005122950819672623
+      },
+      "7": {
+        "n": 3904,
+        "accuracy": 0.5689036885245902,
+        "majority_baseline": 0.5640368852459017,
+        "always_up_accuracy": 0.5640368852459017,
+        "frac_pred_up": 0.6667520491803278,
+        "accuracy_minus_majority": 0.004866803278688492
+      }
+    },
+    "summary": {
+      "mean_accuracy": 0.541623975409836,
+      "mean_majority_baseline": 0.5485399590163935
+    }
+  },
+  "wall_time_s": 5.552168130874634
+}

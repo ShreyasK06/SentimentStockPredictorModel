@@ -1,0 +1,37 @@
+{
+  "stage": "d",
+  "feature_set": "price",
+  "hparams": {
+    "hidden_size": 32,
+    "attention_head_size": 2,
+    "dropout": 0.3,
+    "hidden_continuous_size": 8,
+    "learning_rate": 0.001,
+    "encoder_length": 20
+  },
+  "selected_config_id": 5,
+  "selected_on": "F3 validation (2023)",
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "HD",
+    "GOOGL",
+    "META",
+    "JPM",
+    "BAC",
+    "JNJ",
+    "ABBV",
+    "XOM",
+    "CVX",
+    "CAT",
+    "BA",
+    "WMT",
+    "PG"
+  ],
+  "seeds": [
+    0
+  ],
+  "max_epochs": 15,
+  "limit_train_batches": null
+}

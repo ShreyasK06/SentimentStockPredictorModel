@@ -1,0 +1,260 @@
+{
+  "stage": "c",
+  "phase": "test",
+  "smoke": false,
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "HD",
+    "GOOGL",
+    "META",
+    "JPM",
+    "BAC",
+    "JNJ",
+    "ABBV",
+    "XOM",
+    "CVX",
+    "CAT",
+    "BA",
+    "WMT",
+    "PG"
+  ],
+  "n_tickers": 16,
+  "ticker_rule": "two largest market-cap tickers per sector (8 sectors), fixed before any results",
+  "feature_set": "sentiment",
+  "features": {
+    "observed_reals": [
+      "log_ret_1d",
+      "log_volume_chg",
+      "return_1d",
+      "return_5d",
+      "return_10d",
+      "return_20d",
+      "rsi_14",
+      "macd",
+      "macd_signal",
+      "macd_hist",
+      "volatility_20d",
+      "volume_ratio_20d",
+      "dist_from_ma50",
+      "bollinger_pctb",
+      "bollinger_bandwidth",
+      "atr_14_norm",
+      "stochastic_k",
+      "stochastic_d",
+      "obv_zscore",
+      "dist_from_52w_high",
+      "dist_from_52w_low",
+      "sent_mean",
+      "sent_pos_mean",
+      "sent_neg_mean",
+      "sent_neu_mean",
+      "article_count",
+      "sent_roll3",
+      "sent_roll7",
+      "has_news"
+    ],
+    "known_reals": [
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "month_sin",
+      "month_cos",
+      "day_of_month",
+      "days_to_next_trading_day"
+    ],
+    "known_categoricals": [
+      "day_of_week",
+      "month",
+      "is_month_end",
+      "is_quarter_end",
+      "is_pre_holiday"
+    ],
+    "static_categoricals": [
+      "ticker"
+    ],
+    "target": "log_ret_1d"
+  },
+  "hparams": {
+    "hidden_size": 16,
+    "attention_head_size": 2,
+    "dropout": 0.1,
+    "hidden_continuous_size": 8,
+    "learning_rate": 0.001,
+    "encoder_length": 30
+  },
+  "seeds": [
+    0
+  ],
+  "max_epochs": 15,
+  "limit_train_batches": null,
+  "quantiles": [
+    0.02,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.98
+  ],
+  "split_type": "held-out test (model trained <=2022-12-31, early stopping on 2023)",
+  "dates": {
+    "train_end": "2022-12-31",
+    "val_start": "2023-01-01",
+    "val_end": "2023-12-31",
+    "test_start": "2024-01-01",
+    "test_end": "2025-12-31"
+  },
+  "metrics": {
+    "1": {
+      "n": 7936,
+      "accuracy": 0.5137348790322581,
+      "majority_baseline": 0.5362903225806451,
+      "always_up_accuracy": 0.5362903225806451,
+      "frac_pred_up": 0.8514364919354839,
+      "accuracy_minus_majority": -0.02255544354838701,
+      "step_pinball_loss": 0.00329424744673488,
+      "step_median_mae": 0.011428382599405705,
+      "step_q10_q90_coverage": 0.8403477822580645
+    },
+    "3": {
+      "n": 7936,
+      "accuracy": 0.5405745967741935,
+      "majority_baseline": 0.5601058467741935,
+      "always_up_accuracy": 0.5601058467741935,
+      "frac_pred_up": 0.8930191532258065,
+      "accuracy_minus_majority": -0.01953125,
+      "step_pinball_loss": 0.0032938347419732396,
+      "step_median_mae": 0.011390738362687848,
+      "step_q10_q90_coverage": 0.8326612903225806
+    },
+    "5": {
+      "n": 7936,
+      "accuracy": 0.5544354838709677,
+      "majority_baseline": 0.5709425403225806,
+      "always_up_accuracy": 0.5709425403225806,
+      "frac_pred_up": 0.9073840725806451,
+      "accuracy_minus_majority": -0.016507056451612878,
+      "step_pinball_loss": 0.0033053723842956634,
+      "step_median_mae": 0.011376619620054748,
+      "step_q10_q90_coverage": 0.8314012096774194
+    },
+    "7": {
+      "n": 7936,
+      "accuracy": 0.5623739919354839,
+      "majority_baseline": 0.5786290322580645,
+      "always_up_accuracy": 0.5786290322580645,
+      "frac_pred_up": 0.9139364919354839,
+      "accuracy_minus_majority": -0.016255040322580627,
+      "step_pinball_loss": 0.0033083765691682547,
+      "step_median_mae": 0.01134993769709521,
+      "step_q10_q90_coverage": 0.8324092741935484
+    }
+  },
+  "summary": {
+    "mean_accuracy": 0.5427797379032258,
+    "mean_majority_baseline": 0.5614919354838709
+  },
+  "pinball_loss_all_steps": 0.003299658514386819,
+  "epochs_trained": [
+    9
+  ],
+  "n_train_samples": 11536,
+  "validation_reference_F3": {
+    "split": "F3",
+    "dates": {
+      "train_end": "2022-12-31",
+      "val_start": "2023-01-01",
+      "val_end": "2023-12-31",
+      "test_start": null,
+      "test_end": null
+    },
+    "metrics": {
+      "1": {
+        "n": 3904,
+        "accuracy": 0.5294569672131147,
+        "majority_baseline": 0.5279200819672131,
+        "always_up_accuracy": 0.5279200819672131,
+        "frac_pred_up": 0.8447745901639344,
+        "accuracy_minus_majority": 0.0015368852459016757,
+        "step_pinball_loss": 0.003180045656517015,
+        "step_median_mae": 0.011271924433479725,
+        "step_q10_q90_coverage": 0.860655737704918
+      },
+      "3": {
+        "n": 3904,
+        "accuracy": 0.5614754098360656,
+        "majority_baseline": 0.5448258196721312,
+        "always_up_accuracy": 0.5448258196721312,
+        "frac_pred_up": 0.883452868852459,
+        "accuracy_minus_majority": 0.016649590163934413,
+        "step_pinball_loss": 0.0031617514566278527,
+        "step_median_mae": 0.011187623592815348,
+        "step_q10_q90_coverage": 0.8465676229508197
+      },
+      "5": {
+        "n": 3904,
+        "accuracy": 0.5706967213114754,
+        "majority_baseline": 0.5573770491803278,
+        "always_up_accuracy": 0.5573770491803278,
+        "frac_pred_up": 0.8980532786885246,
+        "accuracy_minus_majority": 0.013319672131147597,
+        "step_pinball_loss": 0.0031535598017441036,
+        "step_median_mae": 0.011093453336456447,
+        "step_q10_q90_coverage": 0.8455430327868853
+      },
+      "7": {
+        "n": 3904,
+        "accuracy": 0.5778688524590164,
+        "majority_baseline": 0.5640368852459017,
+        "always_up_accuracy": 0.5640368852459017,
+        "frac_pred_up": 0.9082991803278688,
+        "accuracy_minus_majority": 0.013831967213114749,
+        "step_pinball_loss": 0.0031507449066340096,
+        "step_median_mae": 0.011026523607448185,
+        "step_q10_q90_coverage": 0.8504098360655737
+      }
+    },
+    "summary": {
+      "mean_accuracy": 0.559874487704918,
+      "mean_majority_baseline": 0.5485399590163935
+    },
+    "pinball_loss_all_steps": 0.003160673766897711,
+    "wall_time_s": 350.84488224983215,
+    "epochs_trained": [
+      9
+    ],
+    "best_val_loss": [
+      0.006321347318589687
+    ],
+    "n_train_samples": 11536
+  },
+  "cv_mean_reference": {
+    "mean_accuracy": 0.5335844311651756,
+    "mean_majority_baseline": 0.5362968389741609,
+    "per_horizon": {
+      "1": {
+        "mean_accuracy": 0.5175194066364384,
+        "mean_majority_baseline": 0.5208253461653887
+      },
+      "3": {
+        "mean_accuracy": 0.5369915129186421,
+        "mean_majority_baseline": 0.5362063196263446
+      },
+      "5": {
+        "mean_accuracy": 0.5377016143655916,
+        "mean_majority_baseline": 0.539875019380003
+      },
+      "7": {
+        "mean_accuracy": 0.5421251907400305,
+        "mean_majority_baseline": 0.5482806707249074
+      }
+    },
+    "folds_included": [
+      "F1",
+      "F2",
+      "F3"
+    ]
+  },
+  "wall_time_s": 15.956101894378662
+}

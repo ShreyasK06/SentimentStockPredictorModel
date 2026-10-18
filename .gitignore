@@ -4,3 +4,9 @@ data/processed/
 __pycache__/
 *.pyc
 .pytest_cache/
+/models/
+lightning_logs/
+reports/phase7/checkpoints/
+reports/phase7/smoke/
+reports/phase7/smoke/
+reports/phase7/latest/

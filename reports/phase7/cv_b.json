@@ -1,0 +1,400 @@
+{
+  "stage": "b",
+  "phase": "cv",
+  "smoke": false,
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "HD",
+    "GOOGL",
+    "META",
+    "JPM",
+    "BAC",
+    "JNJ",
+    "ABBV",
+    "XOM",
+    "CVX",
+    "CAT",
+    "BA",
+    "WMT",
+    "PG"
+  ],
+  "n_tickers": 16,
+  "ticker_rule": "two largest market-cap tickers per sector (8 sectors), fixed before any results",
+  "feature_set": "technical",
+  "features": {
+    "observed_reals": [
+      "log_ret_1d",
+      "log_volume_chg",
+      "return_1d",
+      "return_5d",
+      "return_10d",
+      "return_20d",
+      "rsi_14",
+      "macd",
+      "macd_signal",
+      "macd_hist",
+      "volatility_20d",
+      "volume_ratio_20d",
+      "dist_from_ma50",
+      "bollinger_pctb",
+      "bollinger_bandwidth",
+      "atr_14_norm",
+      "stochastic_k",
+      "stochastic_d",
+      "obv_zscore",
+      "dist_from_52w_high",
+      "dist_from_52w_low"
+    ],
+    "known_reals": [
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "month_sin",
+      "month_cos",
+      "day_of_month",
+      "days_to_next_trading_day"
+    ],
+    "known_categoricals": [
+      "day_of_week",
+      "month",
+      "is_month_end",
+      "is_quarter_end",
+      "is_pre_holiday"
+    ],
+    "static_categoricals": [
+      "ticker"
+    ],
+    "target": "log_ret_1d"
+  },
+  "hparams": {
+    "hidden_size": 16,
+    "attention_head_size": 2,
+    "dropout": 0.1,
+    "hidden_continuous_size": 8,
+    "learning_rate": 0.001,
+    "encoder_length": 30
+  },
+  "seeds": [
+    0
+  ],
+  "max_epochs": 15,
+  "limit_train_batches": null,
+  "quantiles": [
+    0.02,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.98
+  ],
+  "split_type": "walk-forward expanding CV, validation folds",
+  "folds": {
+    "F1": {
+      "split": "F1",
+      "dates": {
+        "train_end": "2020-12-31",
+        "val_start": "2021-01-01",
+        "val_end": "2021-12-31",
+        "test_start": null,
+        "test_end": null
+      },
+      "metrics": {
+        "1": {
+          "n": 3936,
+          "accuracy": 0.48628048780487804,
+          "majority_baseline": 0.5337906504065041,
+          "always_up_accuracy": 0.5337906504065041,
+          "frac_pred_up": 0.4875508130081301,
+          "accuracy_minus_majority": -0.04751016260162605,
+          "step_pinball_loss": 0.0035111982517819374,
+          "step_median_mae": 0.011638676409653203,
+          "step_q10_q90_coverage": 0.9245426829268293
+        },
+        "3": {
+          "n": 3936,
+          "accuracy": 0.5236280487804879,
+          "majority_baseline": 0.5581808943089431,
+          "always_up_accuracy": 0.5581808943089431,
+          "frac_pred_up": 0.6316056910569106,
+          "accuracy_minus_majority": -0.03455284552845528,
+          "step_pinball_loss": 0.0035141851338604695,
+          "step_median_mae": 0.011556674266263368,
+          "step_q10_q90_coverage": 0.9286077235772358
+        },
+        "5": {
+          "n": 3936,
+          "accuracy": 0.5241361788617886,
+          "majority_baseline": 0.5617378048780488,
+          "always_up_accuracy": 0.5617378048780488,
+          "frac_pred_up": 0.7027439024390244,
+          "accuracy_minus_majority": -0.03760162601626016,
+          "step_pinball_loss": 0.003503324348570349,
+          "step_median_mae": 0.011491079753035642,
+          "step_q10_q90_coverage": 0.9329268292682927
+        },
+        "7": {
+          "n": 3936,
+          "accuracy": 0.538109756097561,
+          "majority_baseline": 0.5777439024390244,
+          "always_up_accuracy": 0.5777439024390244,
+          "frac_pred_up": 0.7088414634146342,
+          "accuracy_minus_majority": -0.03963414634146345,
+          "step_pinball_loss": 0.0034999924998679725,
+          "step_median_mae": 0.011491997384926476,
+          "step_q10_q90_coverage": 0.9344512195121951
+        }
+      },
+      "summary": {
+        "mean_accuracy": 0.5180386178861789,
+        "mean_majority_baseline": 0.5578633130081301
+      },
+      "pinball_loss_all_steps": 0.0035073022889683526,
+      "wall_time_s": 157.56208109855652,
+      "epochs_trained": [
+        5
+      ],
+      "best_val_loss": [
+        0.007014603819698095
+      ],
+      "n_train_samples": 3488
+    },
+    "F2": {
+      "split": "F2",
+      "dates": {
+        "train_end": "2021-12-31",
+        "val_start": "2022-01-01",
+        "val_end": "2022-12-31",
+        "test_start": null,
+        "test_end": null
+      },
+      "metrics": {
+        "1": {
+          "n": 3920,
+          "accuracy": 0.4971938775510204,
+          "majority_baseline": 0.500765306122449,
+          "always_up_accuracy": 0.49923469387755104,
+          "frac_pred_up": 0.7765306122448979,
+          "accuracy_minus_majority": -0.0035714285714285587,
+          "step_pinball_loss": 0.004689375088334798,
+          "step_median_mae": 0.016501177950894754,
+          "step_q10_q90_coverage": 0.7275510204081632
+        },
+        "3": {
+          "n": 3920,
+          "accuracy": 0.5056122448979592,
+          "majority_baseline": 0.5056122448979592,
+          "always_up_accuracy": 0.5056122448979592,
+          "frac_pred_up": 0.7959183673469388,
+          "accuracy_minus_majority": 0.0,
+          "step_pinball_loss": 0.004689598031772634,
+          "step_median_mae": 0.016495033908365552,
+          "step_q10_q90_coverage": 0.7216836734693878
+        },
+        "5": {
+          "n": 3920,
+          "accuracy": 0.4956632653061224,
+          "majority_baseline": 0.5005102040816326,
+          "always_up_accuracy": 0.49948979591836734,
+          "frac_pred_up": 0.7941326530612245,
+          "accuracy_minus_majority": -0.004846938775510179,
+          "step_pinball_loss": 0.004682265514314188,
+          "step_median_mae": 0.0164674265374736,
+          "step_q10_q90_coverage": 0.7285714285714285
+        },
+        "7": {
+          "n": 3920,
+          "accuracy": 0.5033163265306122,
+          "majority_baseline": 0.503061224489796,
+          "always_up_accuracy": 0.503061224489796,
+          "frac_pred_up": 0.7941326530612245,
+          "accuracy_minus_majority": 0.0002551020408162463,
+          "step_pinball_loss": 0.004682098999979476,
+          "step_median_mae": 0.016458119063173567,
+          "step_q10_q90_coverage": 0.7346938775510204
+        }
+      },
+      "summary": {
+        "mean_accuracy": 0.5004464285714285,
+        "mean_majority_baseline": 0.5024872448979592
+      },
+      "pinball_loss_all_steps": 0.004686568766624196,
+      "wall_time_s": 393.81150817871094,
+      "epochs_trained": [
+        9
+      ],
+      "best_val_loss": [
+        0.009373137727379799
+      ],
+      "n_train_samples": 7520
+    },
+    "F3": {
+      "split": "F3",
+      "dates": {
+        "train_end": "2022-12-31",
+        "val_start": "2023-01-01",
+        "val_end": "2023-12-31",
+        "test_start": null,
+        "test_end": null
+      },
+      "metrics": {
+        "1": {
+          "n": 3904,
+          "accuracy": 0.4818135245901639,
+          "majority_baseline": 0.5279200819672131,
+          "always_up_accuracy": 0.5279200819672131,
+          "frac_pred_up": 0.47950819672131145,
+          "accuracy_minus_majority": -0.04610655737704916,
+          "step_pinball_loss": 0.0031890722192629436,
+          "step_median_mae": 0.011315448207011655,
+          "step_q10_q90_coverage": 0.8245389344262295
+        },
+        "3": {
+          "n": 3904,
+          "accuracy": 0.4853995901639344,
+          "majority_baseline": 0.5448258196721312,
+          "always_up_accuracy": 0.5448258196721312,
+          "frac_pred_up": 0.5502049180327869,
+          "accuracy_minus_majority": -0.05942622950819676,
+          "step_pinball_loss": 0.0031721411058439645,
+          "step_median_mae": 0.011224028859909871,
+          "step_q10_q90_coverage": 0.8247950819672131
+        },
+        "5": {
+          "n": 3904,
+          "accuracy": 0.4964139344262295,
+          "majority_baseline": 0.5573770491803278,
+          "always_up_accuracy": 0.5573770491803278,
+          "frac_pred_up": 0.5753073770491803,
+          "accuracy_minus_majority": -0.060963114754098324,
+          "step_pinball_loss": 0.0031569841400543334,
+          "step_median_mae": 0.011127415352925406,
+          "step_q10_q90_coverage": 0.8342725409836066
+        },
+        "7": {
+          "n": 3904,
+          "accuracy": 0.49667008196721313,
+          "majority_baseline": 0.5640368852459017,
+          "always_up_accuracy": 0.5640368852459017,
+          "frac_pred_up": 0.5888831967213115,
+          "accuracy_minus_majority": -0.06736680327868855,
+          "step_pinball_loss": 0.0031547845459746955,
+          "step_median_mae": 0.011063309092798687,
+          "step_q10_q90_coverage": 0.8447745901639344
+        }
+      },
+      "summary": {
+        "mean_accuracy": 0.49007428278688525,
+        "mean_majority_baseline": 0.5485399590163935
+      },
+      "pinball_loss_all_steps": 0.0031679855515061492,
+      "wall_time_s": 412.63034105300903,
+      "epochs_trained": [
+        8
+      ],
+      "best_val_loss": [
+        0.006335971411317587
+      ],
+      "n_train_samples": 11536
+    }
+  },
+  "complete": true,
+  "cv_mean": {
+    "mean_accuracy": 0.5028531097481642,
+    "mean_majority_baseline": 0.5362968389741609,
+    "per_horizon": {
+      "1": {
+        "mean_accuracy": 0.4884292966486874,
+        "mean_majority_baseline": 0.5208253461653887
+      },
+      "3": {
+        "mean_accuracy": 0.5048799612807938,
+        "mean_majority_baseline": 0.5362063196263446
+      },
+      "5": {
+        "mean_accuracy": 0.5054044595313801,
+        "mean_majority_baseline": 0.539875019380003
+      },
+      "7": {
+        "mean_accuracy": 0.5126987215317954,
+        "mean_majority_baseline": 0.5482806707249074
+      }
+    },
+    "folds_included": [
+      "F1",
+      "F2",
+      "F3"
+    ]
+  },
+  "validation_F3": {
+    "split": "F3",
+    "dates": {
+      "train_end": "2022-12-31",
+      "val_start": "2023-01-01",
+      "val_end": "2023-12-31",
+      "test_start": null,
+      "test_end": null
+    },
+    "metrics": {
+      "1": {
+        "n": 3904,
+        "accuracy": 0.4818135245901639,
+        "majority_baseline": 0.5279200819672131,
+        "always_up_accuracy": 0.5279200819672131,
+        "frac_pred_up": 0.47950819672131145,
+        "accuracy_minus_majority": -0.04610655737704916,
+        "step_pinball_loss": 0.0031890722192629436,
+        "step_median_mae": 0.011315448207011655,
+        "step_q10_q90_coverage": 0.8245389344262295
+      },
+      "3": {
+        "n": 3904,
+        "accuracy": 0.4853995901639344,
+        "majority_baseline": 0.5448258196721312,
+        "always_up_accuracy": 0.5448258196721312,
+        "frac_pred_up": 0.5502049180327869,
+        "accuracy_minus_majority": -0.05942622950819676,
+        "step_pinball_loss": 0.0031721411058439645,
+        "step_median_mae": 0.011224028859909871,
+        "step_q10_q90_coverage": 0.8247950819672131
+      },
+      "5": {
+        "n": 3904,
+        "accuracy": 0.4964139344262295,
+        "majority_baseline": 0.5573770491803278,
+        "always_up_accuracy": 0.5573770491803278,
+        "frac_pred_up": 0.5753073770491803,
+        "accuracy_minus_majority": -0.060963114754098324,
+        "step_pinball_loss": 0.0031569841400543334,
+        "step_median_mae": 0.011127415352925406,
+        "step_q10_q90_coverage": 0.8342725409836066
+      },
+      "7": {
+        "n": 3904,
+        "accuracy": 0.49667008196721313,
+        "majority_baseline": 0.5640368852459017,
+        "always_up_accuracy": 0.5640368852459017,
+        "frac_pred_up": 0.5888831967213115,
+        "accuracy_minus_majority": -0.06736680327868855,
+        "step_pinball_loss": 0.0031547845459746955,
+        "step_median_mae": 0.011063309092798687,
+        "step_q10_q90_coverage": 0.8447745901639344
+      }
+    },
+    "summary": {
+      "mean_accuracy": 0.49007428278688525,
+      "mean_majority_baseline": 0.5485399590163935
+    },
+    "pinball_loss_all_steps": 0.0031679855515061492,
+    "wall_time_s": 412.63034105300903,
+    "epochs_trained": [
+      8
+    ],
+    "best_val_loss": [
+      0.006335971411317587
+    ],
+    "n_train_samples": 11536
+  },
+  "wall_time_s": 964.4082067012787
+}

@@ -1,0 +1,252 @@
+{
+  "stage": "sentiment_window",
+  "phase": "sentiment_window",
+  "smoke": false,
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "HD",
+    "GOOGL",
+    "META",
+    "JPM",
+    "BAC",
+    "JNJ",
+    "ABBV",
+    "XOM",
+    "CVX",
+    "CAT",
+    "BA",
+    "WMT",
+    "PG"
+  ],
+  "n_tickers": 16,
+  "ticker_rule": "two largest market-cap tickers per sector (8 sectors), fixed before any results",
+  "feature_set": null,
+  "features": {
+    "observed_reals": [],
+    "known_reals": [
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "month_sin",
+      "month_cos",
+      "day_of_month",
+      "days_to_next_trading_day"
+    ],
+    "known_categoricals": [
+      "day_of_week",
+      "month",
+      "is_month_end",
+      "is_quarter_end",
+      "is_pre_holiday"
+    ],
+    "static_categoricals": [
+      "ticker"
+    ],
+    "target": "log_ret_1d"
+  },
+  "hparams": {
+    "hidden_size": 32,
+    "attention_head_size": 2,
+    "dropout": 0.3,
+    "hidden_continuous_size": 8,
+    "learning_rate": 0.001,
+    "encoder_length": 20
+  },
+  "seeds": [
+    0
+  ],
+  "max_epochs": 15,
+  "limit_train_batches": null,
+  "quantiles": [
+    0.02,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.98
+  ],
+  "hparams_source": "frozen_d.json",
+  "split_type": "sentiment-window ablation (held-out Nov-Dec 2025; evaluated once)",
+  "dates": {
+    "train_end": "2025-09-30",
+    "val_start": "2025-10-01",
+    "val_end": "2025-10-31",
+    "test_start": "2025-11-01",
+    "test_end": "2025-12-31"
+  },
+  "test_rows_with_news_pct": 46.34146341463415,
+  "train_rows_with_news_pct": 0.0,
+  "feature_sets": {
+    "technical": {
+      "features": [
+        "log_ret_1d",
+        "log_volume_chg",
+        "return_1d",
+        "return_5d",
+        "return_10d",
+        "return_20d",
+        "rsi_14",
+        "macd",
+        "macd_signal",
+        "macd_hist",
+        "volatility_20d",
+        "volume_ratio_20d",
+        "dist_from_ma50",
+        "bollinger_pctb",
+        "bollinger_bandwidth",
+        "atr_14_norm",
+        "stochastic_k",
+        "stochastic_d",
+        "obv_zscore",
+        "dist_from_52w_high",
+        "dist_from_52w_low"
+      ],
+      "metrics": {
+        "1": {
+          "n": 560,
+          "accuracy": 0.5107142857142857,
+          "majority_baseline": 0.5142857142857142,
+          "always_up_accuracy": 0.5142857142857142,
+          "frac_pred_up": 0.7964285714285714,
+          "accuracy_minus_majority": -0.0035714285714285587,
+          "step_pinball_loss": 0.0032258525216542315,
+          "step_median_mae": 0.011594513741262065,
+          "step_q10_q90_coverage": 0.7678571428571429
+        },
+        "3": {
+          "n": 560,
+          "accuracy": 0.5375,
+          "majority_baseline": 0.5232142857142857,
+          "always_up_accuracy": 0.5232142857142857,
+          "frac_pred_up": 0.8214285714285714,
+          "accuracy_minus_majority": 0.014285714285714235,
+          "step_pinball_loss": 0.00312750860283728,
+          "step_median_mae": 0.011170230609860205,
+          "step_q10_q90_coverage": 0.775
+        },
+        "5": {
+          "n": 560,
+          "accuracy": 0.5232142857142857,
+          "majority_baseline": 0.5392857142857143,
+          "always_up_accuracy": 0.5392857142857143,
+          "frac_pred_up": 0.8303571428571429,
+          "accuracy_minus_majority": -0.016071428571428514,
+          "step_pinball_loss": 0.003060375014520677,
+          "step_median_mae": 0.01081875505473019,
+          "step_q10_q90_coverage": 0.7875
+        },
+        "7": {
+          "n": 560,
+          "accuracy": 0.5303571428571429,
+          "majority_baseline": 0.5589285714285714,
+          "always_up_accuracy": 0.5589285714285714,
+          "frac_pred_up": 0.8321428571428572,
+          "accuracy_minus_majority": -0.02857142857142858,
+          "step_pinball_loss": 0.0030077427483114014,
+          "step_median_mae": 0.010581443516162903,
+          "step_q10_q90_coverage": 0.8017857142857143
+        }
+      },
+      "summary": {
+        "mean_accuracy": 0.5254464285714286,
+        "mean_majority_baseline": 0.5339285714285714
+      },
+      "pinball_loss_all_steps": 0.003103207559976329,
+      "epochs_trained": [
+        6
+      ],
+      "n_train_samples": 22704
+    },
+    "sentiment": {
+      "features": [
+        "log_ret_1d",
+        "log_volume_chg",
+        "return_1d",
+        "return_5d",
+        "return_10d",
+        "return_20d",
+        "rsi_14",
+        "macd",
+        "macd_signal",
+        "macd_hist",
+        "volatility_20d",
+        "volume_ratio_20d",
+        "dist_from_ma50",
+        "bollinger_pctb",
+        "bollinger_bandwidth",
+        "atr_14_norm",
+        "stochastic_k",
+        "stochastic_d",
+        "obv_zscore",
+        "dist_from_52w_high",
+        "dist_from_52w_low",
+        "sent_mean",
+        "sent_pos_mean",
+        "sent_neg_mean",
+        "sent_neu_mean",
+        "article_count",
+        "sent_roll3",
+        "sent_roll7",
+        "has_news"
+      ],
+      "metrics": {
+        "1": {
+          "n": 560,
+          "accuracy": 0.5214285714285715,
+          "majority_baseline": 0.5142857142857142,
+          "always_up_accuracy": 0.5142857142857142,
+          "frac_pred_up": 0.9607142857142857,
+          "accuracy_minus_majority": 0.0071428571428572285,
+          "step_pinball_loss": 0.0032314990056190804,
+          "step_median_mae": 0.011739377657115092,
+          "step_q10_q90_coverage": 0.7767857142857143
+        },
+        "3": {
+          "n": 560,
+          "accuracy": 0.5267857142857143,
+          "majority_baseline": 0.5232142857142857,
+          "always_up_accuracy": 0.5232142857142857,
+          "frac_pred_up": 0.9678571428571429,
+          "accuracy_minus_majority": 0.0035714285714285587,
+          "step_pinball_loss": 0.003118645640487326,
+          "step_median_mae": 0.011227300371005585,
+          "step_q10_q90_coverage": 0.7946428571428571
+        },
+        "5": {
+          "n": 560,
+          "accuracy": 0.5339285714285714,
+          "majority_baseline": 0.5392857142857143,
+          "always_up_accuracy": 0.5392857142857143,
+          "frac_pred_up": 0.9839285714285714,
+          "accuracy_minus_majority": -0.005357142857142838,
+          "step_pinball_loss": 0.003053827979732306,
+          "step_median_mae": 0.010875915061967348,
+          "step_q10_q90_coverage": 0.8053571428571429
+        },
+        "7": {
+          "n": 560,
+          "accuracy": 0.5535714285714286,
+          "majority_baseline": 0.5589285714285714,
+          "always_up_accuracy": 0.5589285714285714,
+          "frac_pred_up": 0.9803571428571428,
+          "accuracy_minus_majority": -0.005357142857142838,
+          "step_pinball_loss": 0.0030135071595610357,
+          "step_median_mae": 0.010635730537145406,
+          "step_q10_q90_coverage": 0.8196428571428571
+        }
+      },
+      "summary": {
+        "mean_accuracy": 0.5339285714285715,
+        "mean_majority_baseline": 0.5339285714285714
+      },
+      "pinball_loss_all_steps": 0.003100959657857225,
+      "epochs_trained": [
+        10
+      ],
+      "n_train_samples": 22704
+    }
+  },
+  "wall_time_s": 995.0381095409393
+}
