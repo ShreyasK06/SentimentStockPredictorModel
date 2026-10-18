@@ -2,6 +2,12 @@
 
 Research project: financial news headlines are scored with FinBERT (`ProsusAI/finbert`), combined with technical and calendar features, and fed to a Temporal Fusion Transformer (TFT) that produces multi-horizon (1, 3, 5 and 7 trading day) forecasts with quantile bands. The repo also contains the earlier baseline phases (logistic regression, random forest, LightGBM, XGBoost, a small LSTM, cross-sectional features), a Next.js dashboard, and an Alpaca paper-trading pipeline.
 
+## Phase 8: news-sentiment up/down classifier (latest)
+
+Headlines (FNSPID 2009-2023, 162,704 articles, 28 tickers; Finnhub for live inference) are scored with FinBERT and fed to calibrated classifiers that predict next-trading-day direction and **abstain unless confident**. Target was ~85% accuracy on confident calls; **it was not reached.** Held-out test (2022-01-01..2023-12-16, n=7,578, run once): unrestricted accuracy 0.517-0.520 vs 0.520 majority rate; primary model (`b_emb`) confident-call accuracy 0.505 (95% CI 0.473-0.537) at 36% coverage vs 0.505 local baseline. Walk-forward CV (2017-2021) pooled confident accuracy for the primary: 0.522 (0.495-0.548) at 39% coverage vs 0.517. No edge; full tables, splits and caveats in [docs/phase8_results.md](docs/phase8_results.md).
+
+Run it: `python scripts/phase8_build_fnspid_dataset.py` (data), `python scripts/phase8_build_features.py score|build --source fnspid` (FinBERT features), `python scripts/run_phase8_models.py cv` then `final` (final runs the test once and locks), `python scripts/predict_news_direction.py` (live UP/DOWN/ABSTAIN from latest Finnhub news; needs `FINNHUB_API_KEY` in `.env`, otherwise uses cached news). Tests: `python -m pytest tests -q`.
+
 **This is a research project, not a trading system.** Across Phases 3 to 5, no model's measured directional accuracy beat its matched majority-class baseline (see [Results](#results)). Phase 7 (TFT) did not beat it either. On held-out test (2024-2025), every stage scored between 1.7 and 4.5 points below the majority baseline. See [docs/phase7_tft_results.md](docs/phase7_tft_results.md). Nothing here should be read as evidence of a predictive edge.
 
 ## Architecture

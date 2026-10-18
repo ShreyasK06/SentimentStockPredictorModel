@@ -1,0 +1,10 @@
+{
+ "primary_family": "b_emb",
+ "chosen_hparams": {
+  "a_logit": "C=0.01",
+  "a_lgbm": "leaves=7,trees=150",
+  "b_emb": "pca=16,C=0.01",
+  "abl_news_only_logit": "C=0.01",
+  "abl_ctl_only_logit": "C=0.01"
+ }
+}
