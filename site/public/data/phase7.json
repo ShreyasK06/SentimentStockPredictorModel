@@ -1,0 +1,115 @@
+{
+ "test_window": "2024-01-01..2025-12-31",
+ "horizons": [
+  1,
+  3,
+  5,
+  7
+ ],
+ "universe": "16 large-cap tickers, 2 per sector",
+ "summary": "No Phase 7 configuration beat the majority-class baseline on the held-out test set.",
+ "stages": [
+  {
+   "stage": "a. Price only, untuned",
+   "cv_acc": 0.54,
+   "cv_maj": 0.536,
+   "f3_acc": 0.546,
+   "f3_maj": 0.549,
+   "test_acc": 0.539,
+   "test_maj": 0.561,
+   "test_minus_maj": -0.022,
+   "acc_ci": [
+    0.522,
+    0.557
+   ],
+   "diff_ci": [
+    -0.045,
+    0.002
+   ]
+  },
+  {
+   "stage": "b. + technical indicators",
+   "cv_acc": 0.503,
+   "cv_maj": 0.536,
+   "f3_acc": 0.49,
+   "f3_maj": 0.549,
+   "test_acc": 0.516,
+   "test_maj": 0.561,
+   "test_minus_maj": -0.045,
+   "acc_ci": [
+    0.497,
+    0.534
+   ],
+   "diff_ci": [
+    -0.074,
+    -0.016
+   ]
+  },
+  {
+   "stage": "c. + FinBERT sentiment",
+   "cv_acc": 0.534,
+   "cv_maj": 0.536,
+   "f3_acc": 0.56,
+   "f3_maj": 0.549,
+   "test_acc": 0.543,
+   "test_maj": 0.561,
+   "test_minus_maj": -0.019,
+   "acc_ci": [
+    0.52,
+    0.564
+   ],
+   "diff_ci": [
+    -0.037,
+    -0.001
+   ]
+  },
+  {
+   "stage": "d. Tuned hyperparameters (price)",
+   "cv_acc": 0.537,
+   "cv_maj": 0.536,
+   "f3_acc": 0.57,
+   "f3_maj": 0.549,
+   "test_acc": 0.541,
+   "test_maj": 0.561,
+   "test_minus_maj": -0.021,
+   "acc_ci": [
+    0.521,
+    0.559
+   ],
+   "diff_ci": [
+    -0.042,
+    0.005
+   ]
+  },
+  {
+   "stage": "e. d + confidence threshold (confident subset)",
+   "cv_acc": 0.551,
+   "cv_maj": 0.536,
+   "f3_acc": 0.6,
+   "f3_maj": 0.545,
+   "test_acc": 0.539,
+   "test_maj": 0.556,
+   "test_minus_maj": -0.017,
+   "acc_ci": null,
+   "diff_ci": null
+  },
+  {
+   "stage": "LightGBM baseline, same targets",
+   "cv_acc": 0.521,
+   "cv_maj": 0.536,
+   "f3_acc": 0.542,
+   "f3_maj": 0.549,
+   "test_acc": 0.524,
+   "test_maj": 0.561,
+   "test_minus_maj": -0.037,
+   "acc_ci": [
+    0.506,
+    0.542
+   ],
+   "diff_ci": [
+    -0.058,
+    -0.015
+   ]
+  }
+ ]
+}

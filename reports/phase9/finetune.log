@@ -1,0 +1,126 @@
+2026-10-18 13:36:46,061 TensorFlow version 2.20.0 available.
+2026-10-18 13:36:48,241 HTTP Request: HEAD https://huggingface.co/datasets/atrost/financial_phrasebank/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 13:36:48,257 HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/atrost/financial_phrasebank/fc7fb491db5069dc7494bc0a8c937b3661b8fdce/README.md?%2Fdatasets%2Fatrost%2Ffinancial_phrasebank%2Fresolve%2Fmain%2FREADME.md=&etag=%22d480d8f7b0a0fdf9ea031716e31b80dfd9e9984c%22 "HTTP/1.1 200 OK"
+2026-10-18 13:36:48,296 HTTP Request: HEAD https://huggingface.co/datasets/atrost/financial_phrasebank/resolve/fc7fb491db5069dc7494bc0a8c937b3661b8fdce/financial_phrasebank.py "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:48,297 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-10-18 13:36:48,424 HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/atrost/financial_phrasebank/atrost/financial_phrasebank.py "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:48,610 HTTP Request: GET https://huggingface.co/api/datasets/atrost/financial_phrasebank/revision/fc7fb491db5069dc7494bc0a8c937b3661b8fdce "HTTP/1.1 200 OK"
+2026-10-18 13:36:48,641 HTTP Request: HEAD https://huggingface.co/datasets/atrost/financial_phrasebank/resolve/fc7fb491db5069dc7494bc0a8c937b3661b8fdce/.huggingface.yaml "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:48,784 HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=atrost/financial_phrasebank "HTTP/1.1 200 OK"
+2026-10-18 13:36:48,831 HTTP Request: GET https://huggingface.co/api/datasets/atrost/financial_phrasebank/tree/fc7fb491db5069dc7494bc0a8c937b3661b8fdce/data?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-10-18 13:36:48,874 HTTP Request: GET https://huggingface.co/api/datasets/atrost/financial_phrasebank/tree/fc7fb491db5069dc7494bc0a8c937b3661b8fdce?recursive=false&expand=false "HTTP/1.1 200 OK"
+2026-10-18 13:36:48,917 HTTP Request: HEAD https://huggingface.co/datasets/atrost/financial_phrasebank/resolve/fc7fb491db5069dc7494bc0a8c937b3661b8fdce/dataset_infos.json "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:49,142 HTTP Request: HEAD https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 13:36:49,155 HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/zeroshot/twitter-financial-news-sentiment/ccbe24de388e287beb92dd393a335c376b350ac3/README.md?%2Fdatasets%2Fzeroshot%2Ftwitter-financial-news-sentiment%2Fresolve%2Fmain%2FREADME.md=&etag=%22bc727b77bf7e430af9514a547dc83a7a82c7040e%22 "HTTP/1.1 200 OK"
+2026-10-18 13:36:49,182 HTTP Request: HEAD https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment/resolve/ccbe24de388e287beb92dd393a335c376b350ac3/twitter-financial-news-sentiment.py "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:49,207 HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/zeroshot/twitter-financial-news-sentiment/zeroshot/twitter-financial-news-sentiment.py "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:49,239 HTTP Request: GET https://huggingface.co/api/datasets/zeroshot/twitter-financial-news-sentiment/revision/ccbe24de388e287beb92dd393a335c376b350ac3 "HTTP/1.1 200 OK"
+2026-10-18 13:36:49,267 HTTP Request: HEAD https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment/resolve/ccbe24de388e287beb92dd393a335c376b350ac3/.huggingface.yaml "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:49,305 HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=zeroshot/twitter-financial-news-sentiment "HTTP/1.1 200 OK"
+2026-10-18 13:36:49,346 HTTP Request: GET https://huggingface.co/api/datasets/zeroshot/twitter-financial-news-sentiment/tree/ccbe24de388e287beb92dd393a335c376b350ac3/data?recursive=true&expand=false "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:49,386 HTTP Request: GET https://huggingface.co/api/datasets/zeroshot/twitter-financial-news-sentiment/tree/ccbe24de388e287beb92dd393a335c376b350ac3?recursive=false&expand=false "HTTP/1.1 200 OK"
+2026-10-18 13:36:49,523 HTTP Request: HEAD https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment/resolve/ccbe24de388e287beb92dd393a335c376b350ac3/dataset_infos.json "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:49,801 splits {'train': 3385, 'val': 725, 'test': 726} class counts {'train': [423, 2009, 953], 'val': [90, 431, 204], 'test': [91, 431, 204], 'cross': [1788, 7739, 2397]}
+2026-10-18 13:36:55,374 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 13:36:55,414 HTTP Request: GET https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 13:36:55,490 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-10-18 13:36:55,528 HTTP Request: GET https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-10-18 13:36:55,574 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 13:36:55,606 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:55,638 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 13:36:55,717 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-10-18 13:36:55,750 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/vocab.txt "HTTP/1.1 200 OK"
+2026-10-18 13:36:55,809 HTTP Request: GET https://huggingface.co/distilbert-base-uncased/resolve/main/vocab.txt "HTTP/1.1 200 OK"
+2026-10-18 13:36:55,884 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer.json "HTTP/1.1 200 OK"
+2026-10-18 13:36:55,930 HTTP Request: GET https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer.json "HTTP/1.1 200 OK"
+2026-10-18 13:36:56,001 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/added_tokens.json "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:56,039 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/special_tokens_map.json "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:56,079 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-10-18 13:36:56,201 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 13:36:56,772 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+2026-10-18 13:36:56,843 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/xet-read-token/12040accade4e8a0f71eabdb258fecc2e7e948be "HTTP/1.1 200 OK"
+2026-10-18 13:37:50,722 untuned head test 0.3058
+2026-10-18 13:37:57,624 tfidf C=3 val 0.7669 test 0.7713
+2026-10-18 13:37:57,717 HTTP Request: HEAD https://huggingface.co/ProsusAI/finbert/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 13:37:57,733 HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ProsusAI/finbert/0bc2ac10dda6929bcb1f77ccc43c7ec5c424f031/config.json?%2FProsusAI%2Ffinbert%2Fresolve%2Fmain%2Fconfig.json=&etag=%22e3d6323dc93e170f3eef66cebb32dbaf4589aee0%22 "HTTP/1.1 200 OK"
+2026-10-18 13:37:57,887 HTTP Request: HEAD https://huggingface.co/ProsusAI/finbert/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 13:37:57,902 HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ProsusAI/finbert/0bc2ac10dda6929bcb1f77ccc43c7ec5c424f031/config.json?%2FProsusAI%2Ffinbert%2Fresolve%2Fmain%2Fconfig.json=&etag=%22e3d6323dc93e170f3eef66cebb32dbaf4589aee0%22 "HTTP/1.1 200 OK"
+2026-10-18 13:37:57,932 HTTP Request: HEAD https://huggingface.co/ProsusAI/finbert/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 13:37:57,946 HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ProsusAI/finbert/0bc2ac10dda6929bcb1f77ccc43c7ec5c424f031/tokenizer_config.json?%2FProsusAI%2Ffinbert%2Fresolve%2Fmain%2Ftokenizer_config.json=&etag=%22cd79adc84d3c96daa03456853766c63141aef734%22 "HTTP/1.1 200 OK"
+2026-10-18 13:37:57,978 HTTP Request: GET https://huggingface.co/api/models/ProsusAI/finbert/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-10-18 13:37:58,011 HTTP Request: GET https://huggingface.co/api/models/ProsusAI/finbert/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-10-18 13:48:32,946 finbert test 0.8691 cross 0.7149
+2026-10-18 13:48:33,415 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 13:48:33,467 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-10-18 13:48:33,523 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 13:48:33,564 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-10-18 13:48:33,614 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 13:48:33,647 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-10-18 13:48:33,760 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 13:56:18,063 select lr=3e-05 epoch=1 val_acc=0.8207
+2026-10-18 14:05:31,179 select lr=3e-05 epoch=2 val_acc=0.8648
+2026-10-18 14:12:22,699 select lr=3e-05 epoch=3 val_acc=0.8634
+2026-10-18 14:19:21,211 select lr=3e-05 epoch=4 val_acc=0.8703
+2026-10-18 14:19:21,307 lr=3e-05 done in 1847s
+2026-10-18 14:19:21,718 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 14:19:21,816 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-10-18 14:19:21,914 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 14:19:22,016 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-10-18 14:19:22,122 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 14:19:22,227 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-10-18 14:19:22,543 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 14:25:46,384 select lr=5e-05 epoch=1 val_acc=0.8234
+2026-10-18 14:33:18,872 select lr=5e-05 epoch=2 val_acc=0.8593
+2026-10-18 14:40:50,586 select lr=5e-05 epoch=3 val_acc=0.8524
+2026-10-18 14:47:31,349 select lr=5e-05 epoch=4 val_acc=0.8538
+2026-10-18 14:47:31,367 lr=5e-05 done in 1688s
+2026-10-18 14:47:31,574 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 14:47:31,623 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-10-18 14:47:31,659 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 14:47:31,692 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-10-18 14:47:31,779 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 14:47:31,811 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-10-18 14:47:31,983 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 14:47:35,888 selected {'lr': 3e-05, 'epoch': 4, 'val_acc': 0.8703448275862069, 'note': 'chosen on validation only; checkpoint saved'}
+2026-10-18 14:47:36,704 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 14:47:36,735 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-10-18 14:47:36,764 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 14:47:36,791 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-10-18 14:47:36,818 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 14:47:36,872 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-10-18 14:47:36,957 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 15:11:57,040 cv fold 0 acc 0.8491 (1460s)
+2026-10-18 15:11:57,258 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 15:11:57,310 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-10-18 15:11:57,347 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 15:11:57,377 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-10-18 15:11:57,409 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 15:11:57,441 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-10-18 15:11:57,626 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 15:36:21,574 cv fold 1 acc 0.8662 (1464s)
+2026-10-18 15:36:21,764 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 15:36:21,802 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-10-18 15:36:21,846 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 15:36:21,884 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-10-18 15:36:21,924 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 15:36:21,956 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-10-18 15:36:22,112 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 16:00:48,329 cv fold 2 acc 0.8443 (1466s)
+2026-10-18 16:00:48,504 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 16:00:48,546 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-10-18 16:00:48,578 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 16:00:48,609 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-10-18 16:00:48,647 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 16:00:48,680 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-10-18 16:00:48,851 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 16:25:01,649 cv fold 3 acc 0.8577 (1453s)
+2026-10-18 16:25:01,942 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 16:25:02,003 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-10-18 16:25:02,037 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 16:25:02,067 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-10-18 16:25:02,104 HTTP Request: GET https://huggingface.co/api/models/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-10-18 16:25:02,138 HTTP Request: GET https://huggingface.co/api/models/distilbert/distilbert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-10-18 16:25:02,349 HTTP Request: HEAD https://huggingface.co/distilbert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-10-18 16:49:47,828 cv fold 4 acc 0.8540 (1485s)
+2026-10-18 16:54:32,129 TEST {'test_acc': 0.8250688705234159, 'ci95': [0.7975206611570248, 0.8526170798898072], 'per_class': {'negative': {'precision': 0.7894736842105263, 'recall': 0.8241758241758241, 'f1': 0.8064516129032258, 'support': 91}, 'neutral': {'precision': 0.8832116788321168, 'recall': 0.8422273781902552, 'f1': 0.8622327790973872, 'support': 431}, 'positive': {'precision': 0.7318181818181818, 'recall': 0.7892156862745098, 'f1': 0.7594339622641509, 'support': 204}}, 'confusion_matrix': [[75, 11, 5], [14, 363, 54], [6, 37, 161]], 'macro_f1': 0.8093727847549212, 'cross_dataset_acc': 0.7015263334451526, 'cross_macro_f1': 0.6166540452901165}
+2026-10-18 16:54:32,202 wrote finetune_results.json

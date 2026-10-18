@@ -2,7 +2,13 @@
 
 Research project: financial news headlines are scored with FinBERT (`ProsusAI/finbert`), combined with technical and calendar features, and fed to a Temporal Fusion Transformer (TFT) that produces multi-horizon (1, 3, 5 and 7 trading day) forecasts with quantile bands. The repo also contains the earlier baseline phases (logistic regression, random forest, LightGBM, XGBoost, a small LSTM, cross-sectional features), a Next.js dashboard, and an Alpaca paper-trading pipeline.
 
-## Phase 8: news-sentiment up/down classifier (latest)
+## Phase 9: fine-tuned sentiment model and project website (latest)
+
+**Sentiment classification** (positive / negative / neutral on financial text): `distilbert-base-uncased` fine-tuned on Financial PhraseBank (`sentences_50agree`, 4,836 deduplicated sentences, stratified 70/15/15 split). Held-out test accuracy (n=726, evaluated once): **82.5%** (95% CI 79.8-85.3%), against 59.4% majority class and 30.6% for an untuned classification head. 5-fold CV on train+val: 85.4% +/- 0.8%. On an independent dataset (Twitter financial news sentiment, 11,924 rows, never used for training or selection) it scores 70.2%, versus 71.5% for ProsusAI/finbert as-is; FinBERT was trained on PhraseBank, so its 86.9% on the PhraseBank test split is not independent evidence. This is **sentiment-classification accuracy, not stock-direction accuracy**; the stock-direction result is Phase 8 below. Details: [docs/phase9_finetune_results.md](docs/phase9_finetune_results.md). Run: `python scripts/run_phase9_finetune.py`; predict with `src/models/sentiment_ft.py`.
+
+**Website** (`site/`, Vite + React + TypeScript, static, GitHub Pages ready): results explorer, pipeline diagram, precomputed headline demo. `cd site && npm install && npm run dev`; refresh data with `python scripts/export_site_data.py`. See [site/README.md](site/README.md).
+
+## Phase 8: news-sentiment up/down classifier
 
 Headlines (FNSPID 2009-2023, 162,704 articles, 28 tickers; Finnhub for live inference) are scored with FinBERT and fed to calibrated classifiers that predict next-trading-day direction and **abstain unless confident**. Target was ~85% accuracy on confident calls; **it was not reached.** Held-out test (2022-01-01..2023-12-16, n=7,578, run once): unrestricted accuracy 0.517-0.520 vs 0.520 majority rate; primary model (`b_emb`) confident-call accuracy 0.505 (95% CI 0.473-0.537) at 36% coverage vs 0.505 local baseline. Walk-forward CV (2017-2021) pooled confident accuracy for the primary: 0.522 (0.495-0.548) at 39% coverage vs 0.517. No edge; full tables, splits and caveats in [docs/phase8_results.md](docs/phase8_results.md).
 

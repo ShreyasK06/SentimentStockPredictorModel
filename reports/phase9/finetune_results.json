@@ -1,0 +1,94 @@
+{
+  "datasets": {
+    "financial_phrasebank": {
+      "source": "HF atrost/financial_phrasebank (parquet mirror of takala/financial_phrasebank, config sentences_50agree; labels >=50% annotator agreement; takala's loader script is unsupported by datasets>=4)",
+      "label_mapping": "0=negative, 1=neutral, 2=positive (source order kept)",
+      "raw_rows": 4846,
+      "after_dedupe": 4836,
+      "dropped_duplicates_or_conflicts": 10,
+      "role": "train/val/test (stratified 70/15/15, seed 42)"
+    },
+    "twitter_financial_news_sentiment": {
+      "source": "HF zeroshot/twitter-financial-news-sentiment (train+validation merged)",
+      "label_mapping": "source 0=Bearish->negative, 1=Bullish->positive, 2=Neutral->neutral",
+      "raw_rows": 11931,
+      "after_dedupe": 11924,
+      "removed_overlap_with_phrasebank": 0,
+      "used_rows": 11924,
+      "role": "entirely held out; cross-dataset test only, never used for training or selection"
+    }
+  },
+  "splits": {
+    "train": 3385,
+    "val": 725,
+    "test": 726
+  },
+  "baselines": {
+    "majority": 0.59366391184573,
+    "untuned_head": 0.30578512396694213,
+    "tfidf_logreg": 0.7713498622589532,
+    "prosus_finbert_as_is": {
+      "acc": 0.8691460055096418,
+      "caveat": "FinBERT was trained on Financial PhraseBank; this PhraseBank-test score is not independent evidence."
+    }
+  },
+  "finetuned": {
+    "model": "distilbert-base-uncased fine-tuned (models/sentiment_ft)",
+    "val_acc": 0.8703448275862069,
+    "test_acc": 0.8250688705234159,
+    "test_acc_ci95": [
+      0.7975206611570248,
+      0.8526170798898072
+    ],
+    "cv_mean": 0.854257907542579,
+    "cv_std": 0.008357938704290871,
+    "per_class": {
+      "negative": {
+        "precision": 0.7894736842105263,
+        "recall": 0.8241758241758241,
+        "f1": 0.8064516129032258,
+        "support": 91
+      },
+      "neutral": {
+        "precision": 0.8832116788321168,
+        "recall": 0.8422273781902552,
+        "f1": 0.8622327790973872,
+        "support": 431
+      },
+      "positive": {
+        "precision": 0.7318181818181818,
+        "recall": 0.7892156862745098,
+        "f1": 0.7594339622641509,
+        "support": 204
+      }
+    },
+    "confusion_matrix": [
+      [
+        75,
+        11,
+        5
+      ],
+      [
+        14,
+        363,
+        54
+      ],
+      [
+        6,
+        37,
+        161
+      ]
+    ],
+    "cross_dataset_acc": 0.7015263334451526
+  },
+  "notes": [
+    "Primary data: Financial PhraseBank sentences_50agree (>=50% annotator agreement; noisier labels than allagree, so the accuracy ceiling is lower).",
+    "ProsusAI/finbert was trained on Financial PhraseBank, so its PhraseBank-test score is NOT independent evidence (test sentences were likely in its training data). Its cross-dataset score on Twitter is the fairer comparison: 0.7149.",
+    "Untuned baseline = distilbert-base-uncased with a randomly initialised 3-way head, no training, scored on the same test split.",
+    "Epoch/lr selected on VALIDATION only (lr grid [3e-05, 5e-05], up to 4 epochs): lr=3e-05 epoch=4 val_acc=0.8703.",
+    "cv_mean/cv_std: 5-fold stratified CV on train+val (4110 rows) using the selected lr and epoch count; sample std (ddof=1). Test set not included in CV.",
+    "test_acc_ci95: bootstrap (2000 resamples) percentile CI on test accuracy, split=test.",
+    "cross_dataset_acc: fine-tuned model on zeroshot/twitter-financial-news-sentiment (train+val merged, n=11924), never trained on; TF-IDF LR gets 0.6554, FinBERT 0.7149 there.",
+    "Test macro-F1 = 0.8094; majority-class on test = 0.5937."
+  ]
+}

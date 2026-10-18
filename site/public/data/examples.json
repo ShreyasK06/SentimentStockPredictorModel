@@ -1,0 +1,392 @@
+{
+ "note": "Headlines are illustrative sentences written for this demo; they are not real news items. Scores were computed offline.",
+ "max_length": 64,
+ "models": [
+  {
+   "id": "prosus_finbert",
+   "label": "FinBERT (ProsusAI/finbert), as released",
+   "kind": "baseline"
+  },
+  {
+   "id": "finetuned",
+   "label": "Fine-tuned FinBERT (models/sentiment_ft)",
+   "kind": "fine-tuned"
+  }
+ ],
+ "examples": [
+  {
+   "id": 0,
+   "ticker": "AAPL",
+   "headline": "Apple raises full-year guidance after record services revenue",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.49297,
+     "negative": 0.32218,
+     "neutral": 0.18486
+    },
+    "finetuned": {
+     "positive": 0.00882,
+     "negative": 0.00183,
+     "neutral": 0.98935
+    }
+   }
+  },
+  {
+   "id": 1,
+   "ticker": "AAPL",
+   "headline": "Apple faces new antitrust probe over App Store fees",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.01092,
+     "negative": 0.95,
+     "neutral": 0.03908
+    },
+    "finetuned": {
+     "positive": 0.00445,
+     "negative": 0.84011,
+     "neutral": 0.15544
+    }
+   }
+  },
+  {
+   "id": 2,
+   "ticker": "MSFT",
+   "headline": "Microsoft cloud growth slows for a third straight quarter",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.00726,
+     "negative": 0.97254,
+     "neutral": 0.0202
+    },
+    "finetuned": {
+     "positive": 0.00591,
+     "negative": 0.98225,
+     "neutral": 0.01184
+    }
+   }
+  },
+  {
+   "id": 3,
+   "ticker": "MSFT",
+   "headline": "Microsoft announces a $60 billion share buyback and raises its dividend",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.27482,
+     "negative": 0.15354,
+     "neutral": 0.57164
+    },
+    "finetuned": {
+     "positive": 0.51486,
+     "negative": 0.00478,
+     "neutral": 0.48037
+    }
+   }
+  },
+  {
+   "id": 4,
+   "ticker": "AMZN",
+   "headline": "Amazon warehouse strike spreads to additional facilities",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.02049,
+     "negative": 0.75596,
+     "neutral": 0.22354
+    },
+    "finetuned": {
+     "positive": 0.00271,
+     "negative": 0.0014,
+     "neutral": 0.99588
+    }
+   }
+  },
+  {
+   "id": 5,
+   "ticker": "AMZN",
+   "headline": "Amazon beats profit estimates as retail margins widen",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.93574,
+     "negative": 0.03066,
+     "neutral": 0.03359
+    },
+    "finetuned": {
+     "positive": 0.16903,
+     "negative": 0.01197,
+     "neutral": 0.819
+    }
+   }
+  },
+  {
+   "id": 6,
+   "ticker": "JPM",
+   "headline": "JPMorgan sets aside more cash for expected loan losses",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.09121,
+     "negative": 0.07112,
+     "neutral": 0.83768
+    },
+    "finetuned": {
+     "positive": 0.00364,
+     "negative": 0.0012,
+     "neutral": 0.99516
+    }
+   }
+  },
+  {
+   "id": 7,
+   "ticker": "JPM",
+   "headline": "JPMorgan reports record trading revenue in the quarter",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.94203,
+     "negative": 0.02186,
+     "neutral": 0.03611
+    },
+    "finetuned": {
+     "positive": 0.00215,
+     "negative": 0.00191,
+     "neutral": 0.99594
+    }
+   }
+  },
+  {
+   "id": 8,
+   "ticker": "XOM",
+   "headline": "Exxon profit falls as crude prices slide",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.01726,
+     "negative": 0.96008,
+     "neutral": 0.02266
+    },
+    "finetuned": {
+     "positive": 0.00453,
+     "negative": 0.97528,
+     "neutral": 0.0202
+    }
+   }
+  },
+  {
+   "id": 9,
+   "ticker": "XOM",
+   "headline": "Exxon completes acquisition, adding low-cost shale acreage",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.83531,
+     "negative": 0.01006,
+     "neutral": 0.15463
+    },
+    "finetuned": {
+     "positive": 0.39269,
+     "negative": 0.00187,
+     "neutral": 0.60544
+    }
+   }
+  },
+  {
+   "id": 10,
+   "ticker": "BA",
+   "headline": "Boeing halts deliveries after fresh quality inspection findings",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.00824,
+     "negative": 0.94331,
+     "neutral": 0.04845
+    },
+    "finetuned": {
+     "positive": 0.0033,
+     "negative": 0.88659,
+     "neutral": 0.1101
+    }
+   }
+  },
+  {
+   "id": 11,
+   "ticker": "BA",
+   "headline": "Boeing wins large aircraft order from Asian carrier",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.93875,
+     "negative": 0.01965,
+     "neutral": 0.04159
+    },
+    "finetuned": {
+     "positive": 0.99272,
+     "negative": 0.00321,
+     "neutral": 0.00407
+    }
+   }
+  },
+  {
+   "id": 12,
+   "ticker": "JNJ",
+   "headline": "Johnson & Johnson trial misses primary endpoint in late-stage study",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.01774,
+     "negative": 0.92223,
+     "neutral": 0.06002
+    },
+    "finetuned": {
+     "positive": 0.00419,
+     "negative": 0.10332,
+     "neutral": 0.89249
+    }
+   }
+  },
+  {
+   "id": 13,
+   "ticker": "JNJ",
+   "headline": "Johnson & Johnson receives regulatory approval for new therapy",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.90547,
+     "negative": 0.01125,
+     "neutral": 0.08328
+    },
+    "finetuned": {
+     "positive": 0.99234,
+     "negative": 0.00174,
+     "neutral": 0.00591
+    }
+   }
+  },
+  {
+   "id": 14,
+   "ticker": "WMT",
+   "headline": "Walmart cuts annual outlook citing weaker discretionary spending",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.0091,
+     "negative": 0.9662,
+     "neutral": 0.0247
+    },
+    "finetuned": {
+     "positive": 0.00333,
+     "negative": 0.98491,
+     "neutral": 0.01176
+    }
+   }
+  },
+  {
+   "id": 15,
+   "ticker": "WMT",
+   "headline": "Walmart reports steady same-store sales growth",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.93796,
+     "negative": 0.03929,
+     "neutral": 0.02275
+    },
+    "finetuned": {
+     "positive": 0.99502,
+     "negative": 0.00222,
+     "neutral": 0.00276
+    }
+   }
+  },
+  {
+   "id": 16,
+   "ticker": "META",
+   "headline": "Meta to cut thousands of jobs in a new round of restructuring",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.02775,
+     "negative": 0.92655,
+     "neutral": 0.0457
+    },
+    "finetuned": {
+     "positive": 0.00422,
+     "negative": 0.98746,
+     "neutral": 0.00832
+    }
+   }
+  },
+  {
+   "id": 17,
+   "ticker": "GOOGL",
+   "headline": "Alphabet unveils AI features across search and advertising products",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.11386,
+     "negative": 0.00898,
+     "neutral": 0.87716
+    },
+    "finetuned": {
+     "positive": 0.00204,
+     "negative": 0.00096,
+     "neutral": 0.997
+    }
+   }
+  },
+  {
+   "id": 18,
+   "ticker": "PG",
+   "headline": "Procter & Gamble says it expects results in line with prior guidance",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.94679,
+     "negative": 0.01522,
+     "neutral": 0.03799
+    },
+    "finetuned": {
+     "positive": 0.70282,
+     "negative": 0.00295,
+     "neutral": 0.29423
+    }
+   }
+  },
+  {
+   "id": 19,
+   "ticker": "CAT",
+   "headline": "Caterpillar lowers forecast as construction demand weakens",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.00812,
+     "negative": 0.97145,
+     "neutral": 0.02043
+    },
+    "finetuned": {
+     "positive": 0.00653,
+     "negative": 0.98486,
+     "neutral": 0.00861
+    }
+   }
+  },
+  {
+   "id": 20,
+   "ticker": "HD",
+   "headline": "Home Depot names a new chief financial officer",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.02936,
+     "negative": 0.07776,
+     "neutral": 0.89288
+    },
+    "finetuned": {
+     "positive": 0.00212,
+     "negative": 0.00125,
+     "neutral": 0.99662
+    }
+   }
+  },
+  {
+   "id": 21,
+   "ticker": "BAC",
+   "headline": "Bank of America profit declines on higher credit costs",
+   "scores": {
+    "prosus_finbert": {
+     "positive": 0.01647,
+     "negative": 0.97047,
+     "neutral": 0.01307
+    },
+    "finetuned": {
+     "positive": 0.00551,
+     "negative": 0.98593,
+     "neutral": 0.00855
+    }
+   }
+  }
+ ]
+}

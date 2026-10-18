@@ -1,0 +1,143 @@
+{
+ "datasets": {
+  "financial_phrasebank": {
+   "source": "HF atrost/financial_phrasebank (parquet mirror of takala/financial_phrasebank, config sentences_50agree; labels >=50% annotator agreement; takala's loader script is unsupported by datasets>=4)",
+   "label_mapping": "0=negative, 1=neutral, 2=positive (source order kept)",
+   "raw_rows": 4846,
+   "after_dedupe": 4836,
+   "dropped_duplicates_or_conflicts": 10,
+   "role": "train/val/test (stratified 70/15/15, seed 42)"
+  },
+  "twitter_financial_news_sentiment": {
+   "source": "HF zeroshot/twitter-financial-news-sentiment (train+validation merged)",
+   "label_mapping": "source 0=Bearish->negative, 1=Bullish->positive, 2=Neutral->neutral",
+   "raw_rows": 11931,
+   "after_dedupe": 11924,
+   "removed_overlap_with_phrasebank": 0,
+   "used_rows": 11924,
+   "role": "entirely held out; cross-dataset test only, never used for training or selection"
+  }
+ },
+ "splits": {
+  "train": 3385,
+  "val": 725,
+  "test": 726
+ },
+ "cross_n": 11924,
+ "class_counts": {
+  "train": [
+   423,
+   2009,
+   953
+  ],
+  "val": [
+   90,
+   431,
+   204
+  ],
+  "test": [
+   91,
+   431,
+   204
+  ],
+  "cross": [
+   1788,
+   7739,
+   2397
+  ]
+ },
+ "baselines": {
+  "majority": 0.59366391184573,
+  "majority_val": 0.5944827586206897,
+  "untuned_head": 0.30578512396694213,
+  "untuned_head_val": 0.2924137931034483,
+  "tfidf_logreg": 0.7713498622589532,
+  "tfidf_logreg_val": 0.766896551724138,
+  "tfidf_C": 3,
+  "tfidf_logreg_cross": 0.6554008721905401,
+  "prosus_finbert_as_is": 0.8691460055096418,
+  "prosus_finbert_cross": 0.7148607849714861
+ },
+ "select_runs": [
+  {
+   "lr": 3e-05,
+   "val_acc_by_epoch": [
+    0.8206896551724138,
+    0.8648275862068966,
+    0.863448275862069,
+    0.8703448275862069
+   ]
+  },
+  {
+   "lr": 5e-05,
+   "val_acc_by_epoch": [
+    0.8234482758620689,
+    0.8593103448275862,
+    0.8524137931034482,
+    0.8537931034482759
+   ]
+  }
+ ],
+ "selected": {
+  "lr": 3e-05,
+  "epoch": 4,
+  "val_acc": 0.8703448275862069,
+  "note": "chosen on validation only; checkpoint saved"
+ },
+ "cv_folds": [
+  0.8491484184914841,
+  0.8661800486618005,
+  0.8442822384428224,
+  0.8576642335766423,
+  0.8540145985401459
+ ],
+ "cv_mean": 0.854257907542579,
+ "cv_std": 0.008357938704290871,
+ "test": {
+  "test_acc": 0.8250688705234159,
+  "ci95": [
+   0.7975206611570248,
+   0.8526170798898072
+  ],
+  "per_class": {
+   "negative": {
+    "precision": 0.7894736842105263,
+    "recall": 0.8241758241758241,
+    "f1": 0.8064516129032258,
+    "support": 91
+   },
+   "neutral": {
+    "precision": 0.8832116788321168,
+    "recall": 0.8422273781902552,
+    "f1": 0.8622327790973872,
+    "support": 431
+   },
+   "positive": {
+    "precision": 0.7318181818181818,
+    "recall": 0.7892156862745098,
+    "f1": 0.7594339622641509,
+    "support": 204
+   }
+  },
+  "confusion_matrix": [
+   [
+    75,
+    11,
+    5
+   ],
+   [
+    14,
+    363,
+    54
+   ],
+   [
+    6,
+    37,
+    161
+   ]
+  ],
+  "macro_f1": 0.8093727847549212,
+  "cross_dataset_acc": 0.7015263334451526,
+  "cross_macro_f1": 0.6166540452901165
+ }
+}

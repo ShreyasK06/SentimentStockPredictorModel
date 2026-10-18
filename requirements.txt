@@ -18,3 +18,5 @@ scipy==1.16.1
 matplotlib==3.10.6
 pytorch-forecasting==1.7.0
 lightning==2.6.5
+datasets
+huggingface-hub>=1.5,<2
