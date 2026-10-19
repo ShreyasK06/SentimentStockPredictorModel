@@ -2,19 +2,13 @@
 
 Research project: financial news headlines are scored with FinBERT (`ProsusAI/finbert`), combined with technical and calendar features, and fed to a Temporal Fusion Transformer (TFT) that produces multi-horizon (1, 3, 5 and 7 trading day) forecasts with quantile bands. The repo also contains the earlier baseline phases (logistic regression, random forest, LightGBM, XGBoost, a small LSTM, cross-sectional features), a Next.js dashboard, and an Alpaca paper-trading pipeline.
 
-## Phase 9: fine-tuned sentiment model and project website (latest)
+## Latest work
 
-**Sentiment classification** (positive / negative / neutral on financial text): `distilbert-base-uncased` fine-tuned on Financial PhraseBank (`sentences_50agree`, 4,836 deduplicated sentences, stratified 70/15/15 split). Held-out test accuracy (n=726, evaluated once): **82.5%** (95% CI 79.8-85.3%), against 59.4% majority class and 30.6% for an untuned classification head. 5-fold CV on train+val: 85.4% +/- 0.8%. On an independent dataset (Twitter financial news sentiment, 11,924 rows, never used for training or selection) it scores 70.2%, versus 71.5% for ProsusAI/finbert as-is; FinBERT was trained on PhraseBank, so its 86.9% on the PhraseBank test split is not independent evidence. This is **sentiment-classification accuracy, not stock-direction accuracy**; the stock-direction result is Phase 8 below. Details: [docs/phase9_finetune_results.md](docs/phase9_finetune_results.md). Run: `python scripts/run_phase9_finetune.py`; predict with `src/models/sentiment_ft.py`.
+**Phase 9: fine-tuned sentiment model and project website.** `distilbert-base-uncased` is fine-tuned for three-class (positive / negative / neutral) financial sentiment on Financial PhraseBank, with a held-out test split, cross-validation and an independent cross-dataset check. See [docs/phase9_finetune_results.md](docs/phase9_finetune_results.md). Run: `python scripts/run_phase9_finetune.py`; predict with `src/models/sentiment_ft.py`. A static project website lives in `site/` (Vite + React + TypeScript, GitHub Pages ready): `cd site && npm install && npm run dev`; refresh its data with `python scripts/export_site_data.py`. See [site/README.md](site/README.md).
 
-**Website** (`site/`, Vite + React + TypeScript, static, GitHub Pages ready): results explorer, pipeline diagram, precomputed headline demo. `cd site && npm install && npm run dev`; refresh data with `python scripts/export_site_data.py`. See [site/README.md](site/README.md).
+**Phase 8: news-sentiment up/down classifier.** Headlines (FNSPID 2009-2023 for 28 tickers; Finnhub for live inference) are scored with FinBERT and fed to calibrated classifiers that predict next-trading-day direction and abstain unless confident, with a locked, run-once held-out test. Details and caveats: [docs/phase8_results.md](docs/phase8_results.md). Run: `python scripts/phase8_build_fnspid_dataset.py` (data), `python scripts/phase8_build_features.py score|build --source fnspid` (FinBERT features), `python scripts/run_phase8_models.py cv` then `final`, `python scripts/predict_news_direction.py` (live UP/DOWN/ABSTAIN; needs `FINNHUB_API_KEY` in `.env`, otherwise uses cached news). Tests: `python -m pytest tests -q`.
 
-## Phase 8: news-sentiment up/down classifier
-
-Headlines (FNSPID 2009-2023, 162,704 articles, 28 tickers; Finnhub for live inference) are scored with FinBERT and fed to calibrated classifiers that predict next-trading-day direction and **abstain unless confident**. Target was ~85% accuracy on confident calls; **it was not reached.** Held-out test (2022-01-01..2023-12-16, n=7,578, run once): unrestricted accuracy 0.517-0.520 vs 0.520 majority rate; primary model (`b_emb`) confident-call accuracy 0.505 (95% CI 0.473-0.537) at 36% coverage vs 0.505 local baseline. Walk-forward CV (2017-2021) pooled confident accuracy for the primary: 0.522 (0.495-0.548) at 39% coverage vs 0.517. No edge; full tables, splits and caveats in [docs/phase8_results.md](docs/phase8_results.md).
-
-Run it: `python scripts/phase8_build_fnspid_dataset.py` (data), `python scripts/phase8_build_features.py score|build --source fnspid` (FinBERT features), `python scripts/run_phase8_models.py cv` then `final` (final runs the test once and locks), `python scripts/predict_news_direction.py` (live UP/DOWN/ABSTAIN from latest Finnhub news; needs `FINNHUB_API_KEY` in `.env`, otherwise uses cached news). Tests: `python -m pytest tests -q`.
-
-**This is a research project, not a trading system.** Across Phases 3 to 5, no model's measured directional accuracy beat its matched majority-class baseline (see [Results](#results)). Phase 7 (TFT) did not beat it either. On held-out test (2024-2025), every stage scored between 1.7 and 4.5 points below the majority baseline. See [docs/phase7_tft_results.md](docs/phase7_tft_results.md). Nothing here should be read as evidence of a predictive edge.
+**This is a research project, not a trading system.** The stock-direction models have not shown a predictive edge over a majority-class baseline. Nothing here should be read as evidence that they can predict prices. Per-phase results, splits and caveats are in the `docs/phase*_results.md` files.
 
 ## Architecture
 
@@ -123,62 +117,9 @@ Dashboard: `cd dashboard; npm install; npm run dev`. Paper trader: `cd paper-tra
 
 ## Results
 
-All Phase 3 to 5 numbers below are copied from the docs named in the last column. "Accuracy" is accuracy on the confident subset (coverage = fraction of rows predicted). "Local majority baseline" is the majority-class rate within that same subset; a model only counts as beating the baseline if its accuracy exceeds it. The confidence threshold is 0.6 unless noted. Test sets were evaluated once.
+Per-phase results, including splits, baselines and confidence intervals, are in [docs/phase3_results.md](docs/phase3_results.md), [docs/phase3_recent_window_results.md](docs/phase3_recent_window_results.md), [docs/phase4_lstm_results.md](docs/phase4_lstm_results.md), [docs/phase5_cross_sectional_results.md](docs/phase5_cross_sectional_results.md), [docs/phase7_tft_results.md](docs/phase7_tft_results.md), [docs/phase8_results.md](docs/phase8_results.md) and [docs/phase9_finetune_results.md](docs/phase9_finetune_results.md).
 
-### Held-out test results
-
-| Phase / experiment | Model | Split | Accuracy | Coverage | Local majority baseline | Beats baseline? | Source |
-|---|---|---|---|---|---|---|---|
-| 3, full history | Logistic regression | held-out test 2024-2025 | 0.494 | 0.013 | 0.513 | No | phase3_results.md |
-| 3, full history | LightGBM | held-out test 2024-2025 | 0.528 | 0.330 | 0.562 | No | phase3_results.md |
-| 3, full history | Random forest | held-out test 2024-2025 | 0.594 | 0.012 | 0.613 | No | phase3_results.md |
-| 3, full history | XGBoost | held-out test 2024-2025 | 0.492 | 0.554 | 0.556 | No | phase3_results.md |
-| 3b, recent window | Logistic regression | held-out test 2025-11-19 to 2025-12-16 | 0.537 | 0.748 | 0.618 | No | phase3_recent_window_results.md |
-| 3b, recent window | LightGBM | held-out test 2025-11-19 to 2025-12-16 | 0.548 | 0.807 | 0.621 | No | phase3_recent_window_results.md |
-| 3b, recent window | Random forest | held-out test 2025-11-19 to 2025-12-16 | 0.652 | 0.361 | 0.646 | Marginally (+0.6 pp, n=178; the doc calls this noise) | phase3_recent_window_results.md |
-| 3b, recent window | XGBoost | held-out test 2025-11-19 to 2025-12-16 | 0.537 | 0.876 | 0.637 | No | phase3_recent_window_results.md |
-| 4, full history | LSTM | held-out test 2024-01-16 to 2025-12-16 | 0.564 | 0.063 | 0.565 | No | phase4_lstm_results.md |
-| 4, recent window | LSTM | held-out test 2025-12-03 to 2025-12-16 | 0.364 | 0.137 | 0.606 | No | phase4_lstm_results.md |
-| 5, original features | LightGBM | held-out test | 0.528 | 0.330 | 0.562 | No | phase5_cross_sectional_results.md |
-| 5, + cross-sectional features | LightGBM | held-out test | 0.511 | 0.332 | 0.549 | No | phase5_cross_sectional_results.md |
-| 5, 20d/4% label + cross-sectional | LightGBM | held-out test | 0.520 | 0.474 | 0.592 | No | phase5_cross_sectional_results.md |
-
-### Validation results for the same experiments
-
-| Phase / experiment | Model | Split | Accuracy | Coverage | Local majority baseline | Source |
-|---|---|---|---|---|---|---|
-| 3, full history (threshold 0.5) | Logistic regression | validation 2023 | 0.527 | 1.000 | 0.536 | phase3_results.md |
-| 3, full history (threshold 0.5) | LightGBM | validation 2023 | 0.532 | 1.000 | 0.536 | phase3_results.md |
-| 3, full history (threshold 0.5) | Random forest | validation 2023 | 0.546 | 1.000 | 0.536 | phase3_results.md |
-| 3, full history (threshold 0.5) | XGBoost | validation 2023 | 0.527 | 1.000 | 0.536 | phase3_results.md |
-| 3b, recent window (threshold 0.5) | Logistic regression | validation 2025-10-24 to 2025-11-18 | 0.527 | 1.000 | 0.514 | phase3_recent_window_results.md |
-| 3b, recent window (threshold 0.5) | LightGBM | validation 2025-10-24 to 2025-11-18 | 0.490 | 1.000 | 0.514 | phase3_recent_window_results.md |
-| 3b, recent window (threshold 0.5) | Random forest | validation 2025-10-24 to 2025-11-18 | 0.503 | 1.000 | 0.514 | phase3_recent_window_results.md |
-| 3b, recent window (threshold 0.5) | XGBoost | validation 2025-10-24 to 2025-11-18 | 0.508 | 1.000 | 0.514 | phase3_recent_window_results.md |
-| 4, full history (threshold 0.6) | LSTM | validation 2023 | 0.534 | 0.068 | 0.566 | phase4_lstm_results.md |
-| 4, recent window (threshold 0.6) | LSTM | validation (2025 recent window) | 0.303 | 0.325 | 0.621 | phase4_lstm_results.md |
-| 5, original features | LightGBM | validation 2023 | 0.553 | 0.368 | 0.550 | phase5_cross_sectional_results.md |
-| 5, + cross-sectional features | LightGBM | validation 2023 | 0.573 | 0.367 | 0.552 | phase5_cross_sectional_results.md |
-| 5, 20d/4% label + cross-sectional | LightGBM | validation 2023 | 0.577 | 0.509 | 0.567 | phase5_cross_sectional_results.md |
-
-Reading these together: some configurations looked slightly better than their baseline on validation (Phase 3 random forest at threshold 0.5, the Phase 5 variants) and then fell below it on the held-out test. The Phase 3b random forest result (+0.6 pp over 178 predictions) is within noise by the project's own assessment. An earlier apparent random forest win in Phase 3 was an evaluation artifact: accuracy on a confident subset had been compared against the full-set majority rate. `local_majority_baseline` was added to `src/models/evaluate.py` to fix this, and the numbers above use the corrected comparison. The LightGBM ablation of technical vs sentiment features showed no meaningful difference in either window (see the Phase 3 docs).
-
-### Phase 7 (TFT)
-
-<!-- PHASE7_RESULTS_START -->
-Temporal Fusion Transformer, mean directional accuracy over horizons 1/3/5/7 days, 16-ticker subset, single seed. CV = walk-forward folds F1-F3 (2021-2023); held-out test = 2024-01-01..2025-12-31. Each accuracy sits next to the majority-class baseline of the same rows.
-
-| Stage | CV mean acc vs majority | Held-out test acc vs majority | Test minus majority |
-|---|---|---|---|
-| (a) price-only | 0.540 vs 0.536 | 0.539 vs 0.561 | -0.022 |
-| (b) + technical | 0.503 vs 0.536 | 0.516 vs 0.561 | -0.045 |
-| (c) + FinBERT sentiment | 0.534 vs 0.536 | 0.543 vs 0.561 | -0.019 |
-| (d) tuned hyperparameters | 0.537 vs 0.536 | 0.541 vs 0.561 | -0.021 |
-| (e) + confidence threshold (confident subset vs its local majority) | 0.551 vs 0.536 | 0.539 vs 0.556 | -0.017 |
-| LightGBM, same target | 0.521 vs 0.536 | 0.524 vs 0.561 | -0.037 |
-
-No configuration beat the majority-class baseline on held-out test; the primary stages d and e are 2.1 and 1.7 points below it, with 95% block-bootstrap CIs for the mean over horizons that include zero (d: -0.042 to +0.005). The stage d/e validation gains on fold F3 were selection effects and did not carry to F1, F2 or test. The FinBERT sentiment question is inconclusive by construction, not negative: the archived news covers only the last weeks of 2025 (the news fetch keeps about the latest 250 articles per request), so the models never saw a non-zero sentiment value in training. Full details, CIs and tuning log: [docs/phase7_tft_results.md](docs/phase7_tft_results.md).
-<!-- PHASE7_RESULTS_END -->
+Summary of what was learned: no stock-direction model in Phases 3 to 8 showed a predictive edge over its matched majority-class baseline on held-out data. Some configurations looked slightly better on validation and did not hold up on the test set; an earlier apparent win in Phase 3 was an evaluation artifact (confident-subset accuracy compared with the full-set majority rate), fixed by adding `local_majority_baseline` to `src/models/evaluate.py`. The FinBERT sentiment question for the Phase 7 TFT is inconclusive by construction, because the archived news did not cover the training window.
 
 ## Methodology and leakage controls
 
