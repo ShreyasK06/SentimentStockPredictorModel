@@ -2,9 +2,9 @@
 
 Research project: financial news headlines are scored with FinBERT (`ProsusAI/finbert`), combined with technical and calendar features, and fed to a Temporal Fusion Transformer (TFT) that produces multi-horizon (1, 3, 5 and 7 trading day) forecasts with quantile bands. The repo also contains the earlier baseline phases (logistic regression, random forest, LightGBM, XGBoost, a small LSTM, cross-sectional features), a Next.js dashboard, and an Alpaca paper-trading pipeline.
 
-![The project website: methods, sentiment model and results explorer](docs/images/site.png)
+![The live tool: paste headlines, get positive, neutral or negative with probabilities](docs/images/site.png)
 
-**Live site: https://shreyask06.github.io/SentimentStockPredictorModel/** (built from `site/` and deployed by GitHub Actions on pushes to `main`).
+**Live tool: https://shreyask06.github.io/SentimentStockPredictorModel/** scores headlines with the fine-tuned sentiment model, running in your browser (built from `site/`, deployed by GitHub Actions on pushes to `main`).
 
 ## At a glance
 
@@ -22,7 +22,7 @@ Held-out test and cross-validation results agree at roughly 82-85%, and the test
 
 ## Latest work
 
-**Phase 9: fine-tuned sentiment model and project website.** `distilbert-base-uncased` is fine-tuned for three-class (positive / negative / neutral) financial sentiment on Financial PhraseBank, with a held-out test split, cross-validation and an independent cross-dataset check. See [docs/phase9_finetune_results.md](docs/phase9_finetune_results.md). Run: `python scripts/run_phase9_finetune.py`; predict with `src/models/sentiment_ft.py`. A static project website lives in `site/` (Vite + React + TypeScript, GitHub Pages ready): `cd site && npm install && npm run dev`; refresh its data with `python scripts/export_site_data.py`. See [site/README.md](site/README.md).
+**Phase 9: fine-tuned sentiment model and project website.** `distilbert-base-uncased` is fine-tuned for three-class (positive / negative / neutral) financial sentiment on Financial PhraseBank, with a held-out test split, cross-validation and an independent cross-dataset check. See [docs/phase9_finetune_results.md](docs/phase9_finetune_results.md). Run: `python scripts/run_phase9_finetune.py`; predict with `src/models/sentiment_ft.py`. A static tool lives in `site/` (Vite + React + TypeScript, GitHub Pages ready): paste headlines and the fine-tuned model scores them in the browser through ONNX Runtime. Run it with `cd site && npm install && npm run dev`; rebuild its model files after retraining with `python scripts/export_site_model.py`. See [site/README.md](site/README.md).
 
 **Phase 8: news-sentiment up/down classifier.** Headlines (FNSPID 2009-2023 for 28 tickers; Finnhub for live inference) are scored with FinBERT and fed to calibrated classifiers that predict next-trading-day direction and abstain unless confident, with a locked, run-once held-out test. Details and caveats: [docs/phase8_results.md](docs/phase8_results.md). Run: `python scripts/phase8_build_fnspid_dataset.py` (data), `python scripts/phase8_build_features.py score|build --source fnspid` (FinBERT features), `python scripts/run_phase8_models.py cv` then `final`, `python scripts/predict_news_direction.py` (live UP/DOWN/ABSTAIN; needs `FINNHUB_API_KEY` in `.env`, otherwise uses cached news). Tests: `python -m pytest tests -q`.
 

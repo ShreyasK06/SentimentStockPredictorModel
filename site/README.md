@@ -1,8 +1,35 @@
-# Sentiment Stock Predictor: project site
+# Headline Sentiment: the site
 
-A static React + TypeScript + Vite site that presents the project honestly: the pipeline, the FinBERT
-sentiment work (Phase 9), and the stock-direction results (Phases 7 and 8), always next to the baseline
-they have to beat. It has no backend. Every number is read from JSON files in `public/data/`.
+A static React + TypeScript + Vite page where you paste financial headlines, one per line, and the fine-tuned
+DistilBERT sentiment model returns positive, neutral or negative with its probabilities. The model runs in the
+browser through ONNX Runtime (WebAssembly), so there is no backend and nothing typed into the page leaves it.
+Results come with a mix summary and a CSV download.
+
+## How it works
+
+```
+headline text
+   -> src/lib/tokenizer.ts   uncased BERT WordPiece, same ids as the Hugging Face tokenizer
+   -> src/lib/model.ts       onnxruntime-web runs public/model/model.onnx
+   -> src/App.tsx            probabilities, labels, summary, CSV
+```
+
+| File | What it is |
+|---|---|
+| `public/model/model.onnx` | the fine-tuned model (`models/sentiment_ft`) as an ONNX graph with int8 weights and per-channel scales, about 67 MB |
+| `public/model/vocab.txt` | the WordPiece vocabulary, one token per line |
+| `public/model/labels.json` | class order (`negative`, `neutral`, `positive`) and the 64-token length the model was trained at |
+
+The first visit downloads the model and shows a progress bar; the browser keeps a copy, so later visits start
+immediately. The WebAssembly runtime is bundled with the site rather than fetched from a CDN.
+
+### How close is the shipped model to the original?
+
+The weights are stored as int8 but the arithmetic is full precision. Measured on the Phase 9 validation and test
+splits (1,451 headlines), the shipped model and the PyTorch original pick the same class on 99.86% of them (mean
+probability difference 0.002). The tokenizer was checked id-for-id against the Python tokenizer on 3,883 texts,
+including accents, CJK, emoji, control characters and over-long words. `scripts/export_site_model.py` refuses to
+write the model if it drifts from PyTorch on a clear-cut prediction.
 
 ## Develop
 
@@ -14,100 +41,28 @@ npm run dev          # http://localhost:5173/SentimentStockPredictorModel/
 
 Do not run `npm run build` while `npm run dev` or `npm run preview` is serving this folder.
 
-## Build and preview
-
 ```bash
 npm run build        # tsc --noEmit, then vite build into site/dist
 npm run preview      # serves dist on http://localhost:4173/SentimentStockPredictorModel/
-npx tsc --noEmit     # type check only
 ```
 
-`vite.config.ts` sets `base` to `/SentimentStockPredictorModel/` (GitHub Pages project path).
-Override it for a custom domain or another repo name: `SITE_BASE=/ npm run build`.
-Assets are resolved through `import.meta.env.BASE_URL` (see `src/lib/data.ts`); never hardcode `/path` URLs.
-Append `?theme=dark` or `?theme=light` to force a theme.
+`vite.config.ts` sets `base` to `/SentimentStockPredictorModel/` (GitHub Pages project path). Override it for a
+custom domain or another repo name: `SITE_BASE=/ npm run build`. Asset URLs go through `import.meta.env.BASE_URL`;
+never hardcode `/path` URLs.
 
-## Update the data
+## Rebuild the model files
 
-The site only renders what the export script copies out of the reports. After any report changes:
+After retraining (or replacing `models/sentiment_ft`), from the repository root:
 
 ```bash
-python scripts/export_site_data.py            # rewrites site/public/data/*.json
-python scripts/export_site_data.py --no-score # skip headline scoring, keep existing examples.json
+pip install onnx onnxscript onnxruntime        # plus torch and transformers, which the project already uses
+python scripts/export_site_model.py            # writes site/public/model/
 ```
 
-Commit `site/public/data/` so the site builds without Python.
+Commit the three files in `site/public/model/`. `.gitattributes` keeps git from rewriting their line endings.
 
-| Output | Source |
-|---|---|
-| `phase8.json` | `reports/phase8/final_test_results.json`, `reports/phase8/cv_results.json` |
-| `phase7.json` | tables parsed from `docs/phase7_tft_results.md` |
-| `phase9.json` | `reports/phase9/finetune_results.json` (null-safe) |
-| `examples.json` | 22 illustrative headlines scored offline |
-| `meta.json` | export time and source list |
+## Deploy
 
-### Phase 9 (fine-tune) state
-
-`finetune_results.json` starts as a stub of nulls. While `finetuned.test_acc` is null the Sentiment section
-shows a "run pending" state with placeholder bars, an empty confusion matrix and empty F1 rows. As soon as the
-file contains numbers and you re-run the export, the same panels fill in. The reader (`src/lib/phase9.ts`)
-accepts fractions or percentages, `per_class` as an object or a list, and `confusion_matrix` as a plain matrix
-or `{labels, matrix}`; with no labels it assumes negative, neutral, positive.
-
-### Headline demo
-
-The demo is a precomputed gallery, not a live model. The export script scores the headlines with
-`src/models/sentiment_ft.py` when it exists (looking for `score_texts`, `predict_proba`, `score` or `predict`
-returning an n x 3 array), and always with `ProsusAI/finbert` via `src/features/finbert_scoring.py`. Each card
-names the model that produced it. To use your own headlines, edit `HEADLINES` in `scripts/export_site_data.py`.
-The script patches the huggingface-hub version check in-process only, because the local environment pairs
-transformers 5.x with hub 2.x.
-
-## Deploy to GitHub Pages
-
-1. Commit `site/` including `public/data/*.json`.
-2. Add `.github/workflows/pages.yml`:
-
-```yaml
-name: Deploy site
-on:
-  push:
-    branches: [main]
-    paths: ["site/**"]
-permissions: { contents: read, pages: write, id-token: write }
-concurrency: { group: pages, cancel-in-progress: true }
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm, cache-dependency-path: site/package-lock.json }
-      - run: npm ci
-        working-directory: site
-      - run: npm run build
-        working-directory: site
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: site/dist }
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: { name: github-pages, url: "${{ steps.d.outputs.page_url }}" }
-    steps:
-      - id: d
-        uses: actions/deploy-pages@v4
-```
-
-3. In the repository settings, set Pages source to "GitHub Actions".
-
-Doc links use the ref in `REPO_REF` (`src/lib/data.ts`, default `main`). Change it if the write-ups live on another branch.
-
-## Layout
-
-- `src/components/` sections (Hero, Pipeline, SentimentSection, Demo, Direction, Learned, Method, Footer) and `Explorer`.
-- `src/charts/` hand-written SVG/HTML charts: dot plot with intervals, line chart, bars, confusion matrix.
-  Each chart has an `aria-label`, a `<desc>`, direct labels, shape as well as colour, and a table view.
-- Routing is hash based: `#/results` is the explorer, everything else is the single page.
-- Series colours follow a validated categorical order (light and dark steps) defined as CSS variables.
-
-The site never claims a predictive edge. Research, not financial advice.
+`.github/workflows/pages.yml` builds `site/` and publishes it to GitHub Pages on pushes to `main` that touch `site/`.
+In the repository settings, set Pages source to "GitHub Actions", and allow `main` under Settings, Environments,
+github-pages if deployments are restricted to other branches.

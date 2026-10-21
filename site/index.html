@@ -3,17 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="News to FinBERT sentiment to stock forecasts, evaluated rigorously. A research project with honest, measured results. Not financial advice." />
+    <meta name="description" content="Paste financial headlines and get positive, neutral or negative with probabilities from a fine-tuned DistilBERT model that runs in your browser." />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
-    <title>Sentiment Stock Predictor</title>
-    <script>
-      try {
-        var q = /[?&]theme=(light|dark)/.exec(location.search);
-        var t = q ? q[1] : localStorage.getItem("ssp-theme");
-        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
-      } catch (e) {}
-    </script>
+    <title>Headline Sentiment</title>
   </head>
   <body>
     <div id="root"></div>

@@ -1,0 +1,2 @@
+# The model files are consumed byte-for-byte; never let git rewrite their line endings (vocab.txt is read line by line).
+public/model/* -text
