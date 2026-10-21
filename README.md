@@ -4,6 +4,8 @@ Research project: financial news headlines are scored with FinBERT (`ProsusAI/fi
 
 ![The project website: methods, sentiment model and results explorer](docs/images/site.png)
 
+**Live site: https://shreyask06.github.io/SentimentStockPredictorModel/** (built from `site/` and deployed by GitHub Actions on pushes to `main`).
+
 ## At a glance
 
 Fine-tuned `distilbert-base-uncased` for three-class financial sentiment on Financial PhraseBank (train 3,385 / val 725 / test 726):
