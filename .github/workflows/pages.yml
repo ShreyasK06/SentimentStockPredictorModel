@@ -1,5 +1,7 @@
 name: Deploy site to GitHub Pages
 
+# Builds site/ and publishes it. Needs Settings > Pages > Source set to "GitHub Actions".
+
 on:
   push:
     branches: [main, feat/phase9-finetune-and-site]
