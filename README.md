@@ -2,6 +2,22 @@
 
 Research project: financial news headlines are scored with FinBERT (`ProsusAI/finbert`), combined with technical and calendar features, and fed to a Temporal Fusion Transformer (TFT) that produces multi-horizon (1, 3, 5 and 7 trading day) forecasts with quantile bands. The repo also contains the earlier baseline phases (logistic regression, random forest, LightGBM, XGBoost, a small LSTM, cross-sectional features), a Next.js dashboard, and an Alpaca paper-trading pipeline.
 
+![The project website: methods, sentiment model and results explorer](docs/images/site.png)
+
+## At a glance
+
+Fine-tuned `distilbert-base-uncased` for three-class financial sentiment on Financial PhraseBank (train 3,385 / val 725 / test 726):
+
+| Evaluation | Accuracy |
+|---|---|
+| Validation split (used to select learning rate and epochs) | **87.0%** |
+| 5-fold cross-validation on train + val | **85.4% +/- 0.8%** |
+| Held-out test split (scored once, after all choices were frozen) | **82.5%** (95% bootstrap CI 79.8-85.3%) |
+| Cross-dataset: financial tweets, never trained on | 70.2% |
+| Baselines on the test split: majority class / TF-IDF + logistic regression | 59.4% / 77.1% |
+
+Held-out test and cross-validation results agree at roughly 82-85%, and the test split was scored exactly once after every choice was frozen. Full protocol and per-class results: [docs/phase9_finetune_results.md](docs/phase9_finetune_results.md).
+
 ## Latest work
 
 **Phase 9: fine-tuned sentiment model and project website.** `distilbert-base-uncased` is fine-tuned for three-class (positive / negative / neutral) financial sentiment on Financial PhraseBank, with a held-out test split, cross-validation and an independent cross-dataset check. See [docs/phase9_finetune_results.md](docs/phase9_finetune_results.md). Run: `python scripts/run_phase9_finetune.py`; predict with `src/models/sentiment_ft.py`. A static project website lives in `site/` (Vite + React + TypeScript, GitHub Pages ready): `cd site && npm install && npm run dev`; refresh its data with `python scripts/export_site_data.py`. See [site/README.md](site/README.md).
