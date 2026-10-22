@@ -2,7 +2,6 @@
 
 A static React + TypeScript + Vite dashboard. You choose stocks, and for each one it shows:
 
-- **Outlook** for the next trading session from the Phase 8 news model: Bullish, Bearish or No clear call, with the calibrated chance of a rise.
 - **News**, the last 7 days of company headlines, each scored by the fine-tuned sentiment model, as a tone and a negative / neutral / positive mix, with the headlines one click away.
 - **Price**, the last 90 closes as a line with a hover readout.
 
@@ -10,9 +9,9 @@ A table view shows the same numbers as plain rows. Your choice of stocks is reme
 
 There is no backend. The page reads one file, `public/data/dashboard.json`.
 
-## Reading the outlook
+## Reading the sentiment
 
-The model commits to Bullish or Bearish only when its calibrated confidence reaches the threshold chosen on validation data; otherwise it reports No clear call and the page still shows the probability. "Chance of a rise" is that calibrated probability that the next session closes above the last one; 50% is a coin flip. The model's measured held-out accuracy, coverage and baselines are in [`docs/phase8_results.md`](../docs/phase8_results.md), and the decision rule is in `src/models/news_direction.py`.
+Each headline is scored negative, neutral or positive. A stock's tone is the mean of (positive minus negative) over its recent headlines, from -1 to +1: above +0.10 reads Bullish, below -0.10 Bearish, otherwise Neutral. The gauge on each card shows that tone, and the market-mood panel at the top averages it across the stocks you have selected. The page does not show the next-session model call; `dashboard.json` still carries it in `tickers[].outlook`, and the model's measured results are in [`docs/phase8_results.md`](../docs/phase8_results.md).
 
 ## Refresh the data
 
@@ -36,7 +35,7 @@ It reuses `scripts/predict_news_direction.py` for the model, features and decisi
 
 ```
 src/lib/dashboard.ts       data types, formatting, sorting helpers
-src/components/            StockCard, charts (sparkline, probability meter, sentiment mix), StockPicker, StockTable, HeadlineLab
+src/components/            StockCard, charts (sparkline, tone gauge, sentiment mix), CountUp, lib/motion.ts (scroll reveal, count-up, spotlight), StockPicker, StockTable, HeadlineLab
 src/lib/model.ts           in-browser sentiment model (lazy-loaded, used by HeadlineLab only)
 src/lib/tokenizer.ts       WordPiece tokenizer matching the Hugging Face one
 public/model/              ONNX model, vocabulary and labels for the headline box

@@ -54,6 +54,11 @@ export function HeadlineLab() {
           <button type="button" className="btn primary" disabled={status.kind === "loading"} onClick={load}>
             {status.kind === "loading" ? (status.progress < 0 ? "Loading model..." : `Loading model ${Math.round(status.progress * 100)}%`) : "Load the model (67 MB)"}
           </button>
+          {status.kind === "loading" && status.progress >= 0 && (
+            <span className="bar" aria-hidden="true">
+              <i style={{ transform: `scaleX(${status.progress})` }} />
+            </span>
+          )}
           {status.kind === "error" && <p role="alert">{status.message}</p>}
         </div>
       ) : (

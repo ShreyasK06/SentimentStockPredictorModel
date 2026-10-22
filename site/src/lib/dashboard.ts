@@ -68,15 +68,11 @@ export function newsStance(tone: number | null): Stance {
 }
 export const NEWS_TEXT: Record<Stance, string> = { bullish: "Bullish", bearish: "Bearish", neutral: "Neutral" };
 
-/** The model's next-session call: bullish or bearish only when it clears its validation threshold. */
-export function modelStance(o: Outlook): Stance {
-  return o.call === "UP" ? "bullish" : o.call === "DOWN" ? "bearish" : "neutral";
-}
-export const MODEL_TEXT: Record<Stance, string> = { bullish: "Bullish call", bearish: "Bearish call", neutral: "No clear call" };
+/** Reading of the average tone across a set of stocks, for the market-mood panel. */
+export const MOOD_TEXT: Record<Stance, string> = { bullish: "Leaning bullish", bearish: "Leaning bearish", neutral: "Mixed" };
 
 export const toneText = (tone: number) => `${tone >= 0 ? "+" : "-"}${Math.abs(tone).toFixed(2)}`;
 
-export const pct = (x: number, digits = 0) => `${(x * 100).toFixed(digits)}%`;
 export const signedPct = (x: number, digits = 2) => `${x >= 0 ? "+" : "-"}${Math.abs(x * 100).toFixed(digits)}%`;
 export const money = (x: number) => `$${x.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 

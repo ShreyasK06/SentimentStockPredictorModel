@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { dayLabel, money, pct, type Stance } from "../lib/dashboard";
+import { useId, useRef, useState } from "react";
+import { dayLabel, money, toneText } from "../lib/dashboard";
 
 /* ---------- price sparkline ---------- */
 
@@ -11,6 +11,7 @@ const PAD = 6;
 export function Sparkline({ symbol, series }: { symbol: string; series: [string, number][] }) {
   const [hover, setHover] = useState<number | null>(null);
   const ref = useRef<SVGSVGElement>(null);
+  const gradient = `fade-${useId().replace(/:/g, "")}`;
   if (series.length < 2) return null;
 
   const closes = series.map(([, c]) => c);
@@ -50,11 +51,20 @@ export function Sparkline({ symbol, series }: { symbol: string; series: [string,
           e.preventDefault();
         }}
       >
-        <path className="spark-area" d={area} />
-        <path className="spark-line" d={line} />
+        <defs>
+          <linearGradient id={gradient} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stopColor="var(--accent)" stopOpacity="0.32" />
+            <stop offset="1" stopColor="var(--accent)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path className="spark-area" d={area} fill={`url(#${gradient})`} />
+        <path className="spark-line" d={line} pathLength={1} />
         {hover != null && <line className="spark-cross" x1={x(idx)} x2={x(idx)} y1={0} y2={H} />}
-        <circle className="spark-ring" cx={x(idx)} cy={y(closes[idx])} r={6} />
-        <circle className="spark-dot" cx={x(idx)} cy={y(closes[idx])} r={4} />
+        <g className="spark-end" style={{ transform: `translate(${x(idx)}px, ${y(closes[idx])}px)` }}>
+          <circle className="spark-halo" r={9} />
+          <circle className="spark-ring" r={5.5} />
+          <circle className="spark-dot" r={3.5} />
+        </g>
       </svg>
       {hover != null && (
         <div className="spark-tip" style={{ left: `${(x(idx) / W) * 100}%` }} role="status">
@@ -66,14 +76,41 @@ export function Sparkline({ symbol, series }: { symbol: string; series: [string,
   );
 }
 
-/* ---------- probability meter ---------- */
+/* ---------- tone gauge ---------- */
 
-/** One ratio against a limit: the chance of a rise on a 0 to 100% track, with a tick at the 50% coin-flip line. */
-export function ProbabilityMeter({ p, stance }: { p: number; stance: Stance }) {
+/**
+ * Average headline tone (-1 to 1) on a half-dial from bearish to bullish. The needle swings in with a spring when the
+ * card scrolls into view (the transition lives in CSS, keyed off the parent's `.in` class).
+ */
+export function ToneGauge({ tone }: { tone: number | null }) {
+  const gradient = `dial-${useId().replace(/:/g, "")}`;
+  const clamped = tone == null ? 0 : Math.max(-1, Math.min(1, tone));
   return (
-    <div className={`meter ${stance}`} role="img" aria-label={`${pct(p)} chance of a rise; 50% is a coin flip`}>
-      <span className={`meter-fill ${stance}`} style={{ width: `${Math.max(1, p * 100)}%` }} />
-      <span className="meter-tick" />
+    <div className="gauge" role="img" aria-label={tone == null ? "No headlines scored" : `Average headline tone ${toneText(tone)} on a scale from -1, very negative, to +1, very positive`}>
+      <svg viewBox="0 0 100 56" aria-hidden="true">
+        <defs>
+          <linearGradient id={gradient} x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stopColor="var(--down)" />
+            <stop offset="0.5" stopColor="var(--flat)" />
+            <stop offset="1" stopColor="var(--up)" />
+          </linearGradient>
+        </defs>
+        <path className="gauge-track" d="M10 50 A40 40 0 0 1 90 50" />
+        <path className="gauge-arc" d="M10 50 A40 40 0 0 1 90 50" stroke={`url(#${gradient})`} />
+        {[-1, -0.5, 0, 0.5, 1].map((t) => {
+          const a = (t * 90 * Math.PI) / 180;
+          const [x1, y1] = [50 + Math.sin(a) * 32, 50 - Math.cos(a) * 32];
+          const [x2, y2] = [50 + Math.sin(a) * 35, 50 - Math.cos(a) * 35];
+          return <line key={t} className="gauge-tick" x1={x1} y1={y1} x2={x2} y2={y2} />;
+        })}
+        {tone != null && (
+          <g className="gauge-needle" style={{ ["--deg" as string]: `${clamped * 90}deg` }}>
+            <line x1="50" y1="50" x2="50" y2="19" />
+          </g>
+        )}
+        <circle className="gauge-hub" cx="50" cy="50" r="4" />
+      </svg>
+      <span className="gauge-val">{tone == null ? "n/a" : toneText(tone)}</span>
     </div>
   );
 }

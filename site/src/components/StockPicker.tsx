@@ -30,9 +30,11 @@ export function StockPicker({ stocks, selected, onChange }: { stocks: Stock[]; s
       <button type="button" className="btn" aria-expanded={open} aria-controls="picker-panel" onClick={() => setOpen((o) => !o)}>
         Choose stocks
         <span className="count">{selected.length}</span>
-        <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" className={open ? "flip" : ""}>
-          <path d="M2 4l4 4 4-4" />
-        </svg>
+        <span className="ico" aria-hidden="true">
+          <svg viewBox="0 0 12 12" width="10" height="10" className={open ? "flip" : ""}>
+            <path d="M2 4l4 4 4-4" />
+          </svg>
+        </span>
       </button>
 
       {open && (
