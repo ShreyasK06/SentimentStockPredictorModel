@@ -1,114 +1,77 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { loadModel, type Prediction, type SentimentModel } from "./lib/model";
+import { useEffect, useMemo, useState } from "react";
+import { dayLabel, loadDashboard, newsStance, type Dashboard } from "./lib/dashboard";
+import { Arrow, StockCard } from "./components/StockCard";
+import { StockPicker } from "./components/StockPicker";
+import { StockTable } from "./components/StockTable";
+import { HeadlineLab } from "./components/HeadlineLab";
 
-const EXAMPLES = [
-  "Microsoft cloud growth slows for a third straight quarter",
-  "Boeing wins large aircraft order from Asian carrier",
-  "Walmart cuts annual outlook citing weaker discretionary spending",
-  "Johnson & Johnson receives regulatory approval for new therapy",
-  "Home Depot names a new chief financial officer",
-  "Caterpillar lowers forecast as construction demand weakens",
-  "Meta to cut thousands of jobs in a new round of restructuring",
-  "Exxon profit falls as crude prices slide",
-];
-const MAX_LINES = 200;
+const DEFAULT_SELECTION = ["AAPL", "MSFT", "GOOGL", "AMZN", "META", "JPM", "XOM", "JNJ"];
+const STORE_KEY = "ssp-selected-stocks";
 
-type Status = { kind: "loading"; progress: number } | { kind: "ready" } | { kind: "error"; message: string };
-interface Row {
-  headline: string;
-  pred: Prediction;
-}
+type Sort = "news" | "model" | "symbol";
+type View = "cards" | "table";
+type State = { kind: "loading" } | { kind: "error"; message: string } | { kind: "ready"; data: Dashboard };
 
-const titleCase = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-const pct = (p: number) => `${(p * 100).toFixed(p >= 0.995 || p < 0.005 ? 0 : 1)}%`;
-
-function toCsv(rows: Row[], labels: string[]): string {
-  const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
-  const head = ["headline", "prediction", ...labels.map((l) => `p_${l}`)].join(",");
-  const body = rows.map((r) => [esc(r.headline), labels[r.pred.top], ...r.pred.probs.map((p) => p.toFixed(4))].join(","));
-  return [head, ...body].join("\n");
+function readSelection(valid: Set<string>): string[] {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY) ?? "null");
+    if (Array.isArray(saved)) {
+      const kept = saved.filter((s: unknown): s is string => typeof s === "string" && valid.has(s));
+      if (kept.length || saved.length === 0) return kept;
+    }
+  } catch {
+    /* private mode or bad JSON: fall back to the defaults */
+  }
+  return DEFAULT_SELECTION.filter((s) => valid.has(s));
 }
 
 export default function App() {
-  const [status, setStatus] = useState<Status>({ kind: "loading", progress: 0 });
-  const [model, setModel] = useState<SentimentModel | null>(null);
-  const [text, setText] = useState(EXAMPLES.slice(0, 5).join("\n"));
-  const [rows, setRows] = useState<Row[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [truncated, setTruncated] = useState(false);
-  const autoRan = useRef(false);
+  const [state, setState] = useState<State>({ kind: "loading" });
+  const [selected, setSelected] = useState<string[]>([]);
+  const [sort, setSort] = useState<Sort>("news");
+  const [view, setView] = useState<View>("cards");
 
-  const start = useCallback(() => {
-    setStatus({ kind: "loading", progress: 0 });
-    loadModel((progress) => setStatus({ kind: "loading", progress }))
-      .then((m) => {
-        setModel(m);
-        setStatus({ kind: "ready" });
-      })
-      .catch((err: unknown) => setStatus({ kind: "error", message: err instanceof Error ? err.message : String(err) }));
-  }, []);
-  useEffect(start, [start]);
-
-  const analyze = useCallback(
-    async (source: string) => {
-      if (!model) return;
-      const lines = source.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-      setTruncated(lines.length > MAX_LINES);
-      const headlines = lines.slice(0, MAX_LINES);
-      if (!headlines.length) {
-        setRows([]);
-        return;
-      }
-      setBusy(true);
-      try {
-        // Let the browser paint the busy state before the model blocks the main thread.
-        await new Promise((resolve) => setTimeout(resolve, 20));
-        const preds = await model.classify(headlines);
-        setRows(headlines.map((headline, i) => ({ headline, pred: preds[i] })));
-      } finally {
-        setBusy(false);
-      }
-    },
-    [model],
-  );
-
-  // Score the starter headlines as soon as the model is ready, so the page shows a result straight away.
   useEffect(() => {
-    if (model && !autoRan.current) {
-      autoRan.current = true;
-      void analyze(text);
+    loadDashboard()
+      .then((data) => {
+        setSelected(readSelection(new Set(data.tickers.map((t) => t.symbol))));
+        setState({ kind: "ready", data });
+      })
+      .catch((err: unknown) => setState({ kind: "error", message: err instanceof Error ? err.message : String(err) }));
+  }, []);
+
+  const updateSelection = (next: string[]) => {
+    setSelected(next);
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(next));
+    } catch {
+      /* storage unavailable: the choice just won't persist */
     }
-  }, [model, analyze, text]);
-
-  const labels = model?.labels ?? ["negative", "neutral", "positive"];
-  const summary = useMemo(() => {
-    if (!rows.length) return null;
-    const counts = labels.map(() => 0);
-    const mean = labels.map(() => 0);
-    for (const r of rows) {
-      counts[r.pred.top]++;
-      r.pred.probs.forEach((p, i) => (mean[i] += p / rows.length));
-    }
-    const pos = labels.indexOf("positive");
-    const neg = labels.indexOf("negative");
-    return { counts, net: mean[pos] - mean[neg] };
-  }, [rows, labels]);
-
-  const ready = status.kind === "ready";
-  const lineCount = text.split(/\r?\n/).filter((l) => l.trim()).length;
-
-  const download = () => {
-    const url = URL.createObjectURL(new Blob([toCsv(rows, labels)], { type: "text/csv" }));
-    const a = Object.assign(document.createElement("a"), { href: url, download: "sentiment.csv" });
-    a.click();
-    URL.revokeObjectURL(url);
   };
+
+  const data = state.kind === "ready" ? state.data : null;
+  const shown = useMemo(() => {
+    if (!data) return [];
+    const chosen = new Set(selected);
+    const list = data.tickers.filter((t) => chosen.has(t.symbol));
+    if (sort === "symbol") return list.sort((a, b) => a.symbol.localeCompare(b.symbol));
+    if (sort === "model") return list.sort((a, b) => (b.outlook.p_up ?? -1) - (a.outlook.p_up ?? -1));
+    return list.sort((a, b) => (b.news.tone ?? -2) - (a.news.tone ?? -2));
+  }, [data, selected, sort]);
+
+  const tally = useMemo(() => {
+    const t = { bullish: 0, bearish: 0, neutral: 0 };
+    for (const s of shown) t[newsStance(s.news.tone)]++;
+    return { ...t, calls: shown.filter((s) => s.outlook.call !== "ABSTAIN").length };
+  }, [shown]);
+
+  const asOf = data ? data.tickers.map((t) => t.price?.as_of ?? "").sort().pop() : "";
 
   return (
     <>
       <header className="top">
         <div className="wrap top-in">
-          <span className="brand">Headline Sentiment</span>
+          <span className="brand">Market Outlook</span>
           <a className="src" href="https://github.com/ShreyasK06/SentimentStockPredictorModel">
             Source on GitHub
           </a>
@@ -117,152 +80,81 @@ export default function App() {
 
       <main className="wrap" id="main">
         <h1>
-          Score financial headlines<span className="dot">.</span>
+          Where is each stock headed next<span className="dot">?</span>
         </h1>
         <p className="lede">
-          Paste headlines, one per line. A fine-tuned DistilBERT model reads each one and returns positive, neutral or negative with its
-          probabilities. It runs in your browser, so nothing you paste leaves this page.
+          Recent company news is scored by a sentiment model to read each stock as bullish, bearish or neutral. A second model estimates the
+          next session's direction. Pick the stocks you care about.
         </p>
+        {data && (
+          <p className="asof muted">
+            Prices through the close on {asOf ? dayLabel(asOf) : "n/a"} · refreshed {new Date(data.generated_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+          </p>
+        )}
 
-        <section className="card" aria-labelledby="in-h">
-          <div className="card-head">
-            <h2 id="in-h">Headlines</h2>
-            <div className="model-state" role="status" aria-live="polite">
-              {status.kind === "loading" && (
-                <>
-                  <span
-                    className="bar"
-                    role="progressbar"
-                    aria-label="Loading the model"
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={status.progress < 0 ? undefined : Math.round(status.progress * 100)}
-                  >
-                    <span className={status.progress < 0 ? "bar-fill indet" : "bar-fill"} style={status.progress < 0 ? undefined : { width: `${status.progress * 100}%` }} />
-                  </span>
-                  <span>{status.progress < 0 ? "Loading model" : `Loading model ${Math.round(status.progress * 100)}%`}</span>
-                </>
-              )}
-              {status.kind === "ready" && (
-                <>
-                  <span className="ok-dot" aria-hidden="true" />
-                  <span>Model ready</span>
-                </>
-              )}
-              {status.kind === "error" && (
-                <>
-                  <span>Model failed to load.</span>
-                  <button type="button" className="link" onClick={start}>
-                    Retry
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+        {state.kind === "loading" && <p className="status muted" role="status">Loading market data...</p>}
+        {state.kind === "error" && <p className="status" role="alert">{state.message}</p>}
 
-          <label htmlFor="headlines" className="sr-only">
-            Headlines, one per line
-          </label>
-          <textarea
-            id="headlines"
-            value={text}
-            rows={7}
-            spellCheck={false}
-            placeholder="Paste one headline per line"
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => {
-              if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-                e.preventDefault();
-                void analyze(text);
-              }
-            }}
-          />
-
-          <div className="examples" role="group" aria-label="Add an example headline">
-            <span className="muted">Try</span>
-            {EXAMPLES.slice(0, 6).map((ex) => (
-              <button key={ex} type="button" className="chip" onClick={() => setText((t) => (t.trim() ? `${t.trimEnd()}\n${ex}` : ex))}>
-                {ex.split(" ").slice(0, 3).join(" ")}...
-              </button>
-            ))}
-          </div>
-
-          <div className="actions">
-            <button type="button" className="btn primary" disabled={!ready || busy || lineCount === 0} onClick={() => void analyze(text)}>
-              {busy ? "Scoring..." : ready ? `Score ${lineCount} headline${lineCount === 1 ? "" : "s"}` : "Loading model..."}
-            </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={() => {
-                setText("");
-                setRows([]);
-              }}
-              disabled={!text && !rows.length}
-            >
-              Clear
-            </button>
-            <span className="hint">Ctrl or Cmd + Enter</span>
-          </div>
-        </section>
-
-        {rows.length > 0 && summary && (
-          <section className="results" aria-labelledby="res-h" aria-live="polite">
-            <div className="res-head">
-              <h2 id="res-h">Results</h2>
-              <button type="button" className="btn small" onClick={download}>
-                Download CSV
-              </button>
-            </div>
-
-            {rows.length > 1 && (
-              <div className="summary">
-                <div className="mix" role="img" aria-label={labels.map((l, i) => `${summary.counts[i]} ${l}`).join(", ")}>
-                  {labels.map((l, i) => (summary.counts[i] ? <span key={l} className={`seg ${l}`} style={{ flexGrow: summary.counts[i] }} /> : null))}
-                </div>
-                <ul className="counts">
-                  {labels.map((l, i) => (
-                    <li key={l}>
-                      <span className={`swatch ${l}`} aria-hidden="true" />
-                      <strong>{summary.counts[i]}</strong> {l}
-                    </li>
-                  ))}
-                  <li className="net">
-                    Net tone{" "}
-                    <strong>
-                      {summary.net >= 0 ? "+" : ""}
-                      {summary.net.toFixed(2)}
-                    </strong>
-                  </li>
-                </ul>
+        {data && (
+          <>
+            <section className="tiles" aria-label="News sentiment of the selected stocks">
+              <div className="tile bullish">
+                <span className="label">Bullish news</span>
+                <strong><Arrow dir="up" />{tally.bullish}</strong>
               </div>
+              <div className="tile bearish">
+                <span className="label">Bearish news</span>
+                <strong><Arrow dir="down" />{tally.bearish}</strong>
+              </div>
+              <div className="tile neutral">
+                <span className="label">Neutral news</span>
+                <strong><Arrow dir="flat" />{tally.neutral}</strong>
+              </div>
+              <div className="tile">
+                <span className="label">Model calls</span>
+                <strong>
+                  {tally.calls}
+                  <span className="of"> of {shown.length}</span>
+                </strong>
+              </div>
+            </section>
+
+            <div className="toolbar" role="group" aria-label="Choose, sort and view">
+              <StockPicker stocks={data.tickers} selected={selected} onChange={updateSelection} />
+              <label className="select">
+                <span className="muted">Sort</span>
+                <select value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
+                  <option value="news">News sentiment</option>
+                  <option value="model">Model probability</option>
+                  <option value="symbol">Ticker</option>
+                </select>
+              </label>
+              <div className="seg" role="group" aria-label="View">
+                {(["cards", "table"] as View[]).map((v) => (
+                  <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}>
+                    {v === "cards" ? "Cards" : "Table"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {shown.length === 0 ? (
+              <p className="empty">No stocks selected. Use Choose stocks to add some.</p>
+            ) : view === "cards" ? (
+              <div className="cards">
+                {shown.map((s) => (
+                  <StockCard key={s.symbol} stock={s} onRemove={(sym) => updateSelection(selected.filter((x) => x !== sym))} />
+                ))}
+              </div>
+            ) : (
+              <StockTable stocks={shown} />
             )}
 
-            <ol className="rows">
-              {rows.map((r, i) => (
-                <li key={`${i}-${r.headline}`} className="row">
-                  <div className="row-top">
-                    <p className="hl">{r.headline}</p>
-                    <span className={`pill ${labels[r.pred.top]}`}>
-                      {titleCase(labels[r.pred.top])} {pct(r.pred.probs[r.pred.top])}
-                    </span>
-                  </div>
-                  <ul className="probs" aria-label="Probabilities">
-                    {labels.map((l, k) => (
-                      <li key={l} className={k === r.pred.top ? "top" : ""}>
-                        <span className="p-name">{titleCase(l)}</span>
-                        <span className="track" role="presentation">
-                          <span className={`fill ${l}`} style={{ width: `${Math.max(0.6, r.pred.probs[k] * 100)}%` }} />
-                        </span>
-                        <span className="p-val">{pct(r.pred.probs[k])}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ol>
-            {truncated && <p className="muted small-note">Showing the first {MAX_LINES} lines.</p>}
-          </section>
+            <details className="lab-box">
+              <summary>Score your own headline</summary>
+              <HeadlineLab />
+            </details>
+          </>
         )}
       </main>
     </>
